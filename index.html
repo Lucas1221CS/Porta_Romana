@@ -353,7 +353,7 @@
     </div>
     
     <div id="game-intro">
-      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear as many tickets as possible. Tap the exact ingredients needed for the order <strong>in the correct chronological sequence</strong>. Correct sequences auto-complete and give +5 seconds. Mistakes lose 25 points and -2 seconds. Go!</p>
+      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear tickets. Select the ingredients for the order in any order, then click <strong>Serve Order</strong>. Correct orders give +5 seconds. Mistakes lose 25 points and -2 seconds. Go!</p>
       <button class="btn btn-train" onclick="startGame()">▶️ Start Rush</button>
     </div>
 
@@ -369,12 +369,14 @@
         <h1 id="game-order-title" style="margin: 10px 0 0 0; color: #111; font-size: 1.5em; letter-spacing: -0.5px;">Pizza Name</h1>
       </div>
 
-      <div id="game-ingredients-grid" class="staff-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px; max-height: none; overflow: visible; margin-bottom: 5px;">
+      <div id="game-ingredients-grid" class="staff-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px; max-height: none; overflow: visible; margin-bottom: 10px;">
         <!-- Dynamic Ingredients Injected Here -->
       </div>
       
       <!-- Feedback Text -->
-      <div id="game-feedback" style="margin-top: 10px; margin-bottom: 15px; color: var(--accent); font-weight: 700; text-align: center; height: 24px;"></div>
+      <div id="game-feedback" style="margin-top: 5px; margin-bottom: 10px; color: var(--accent); font-weight: 700; text-align: center; height: 24px;"></div>
+      
+      <button class="btn btn-train" onclick="checkOrder()">🔔 Serve Order</button>
     </div>
 
     <div id="game-over" class="hidden" style="text-align: center;">
@@ -519,7 +521,7 @@
     'prep_p21': { title: '21. SPICY CHICKEN PIZZA', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Tomatoes', 'Grilled Chicken', 'Homemade Spicy Sauce'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put tomatoes.', 'Put chicken.', 'Bake for 4 minutes.', 'AFTER BAKING: Put spicy sauce.'] },
     'prep_p22': { title: '22. CALZONE HAM AND CHEESE', type: 'pizza', ingredients: ['Tomato Sauce', 'Cooked Ham', 'Mozzarella', 'Parmesan'], steps: ['Fold dough.', 'Put tomato sauce inside.', 'Put cooked ham and mozzarella inside.', 'Top with parmesan.', 'Bake for 4 minutes.'] },
     
-    // UPDATED PALA RECIPES (HOT VS COLD PREP)
+    // PALA RECIPES
     'prep_pa1': { title: '1. PARIGINA', type: 'panini', ingredients: ['Pala Bread', 'Tomato Sauce', 'Cooked Ham', 'Mozzarella'], steps: ['Slice Pala bread.', 'Add tomato sauce.', 'Add cooked ham and mozzarella.', 'Toast or bake as required.'] },
     'prep_pa2': { title: '2. ITALIAN SAUSAGE', type: 'panini', ingredients: ['Pala Bread', 'Italian Sausage', 'Oven-Stewed Onions', 'Homemade Spicy Sauce'], steps: ['Slice Pala bread.', 'Add Italian sausage and stewed onions.', 'Toast or bake as required.', 'AFTER BAKING: Add spicy homemade sauce.'] },
     'prep_pa3': { title: '3. MORTADELLA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Mozzarella', 'Mortadella'], steps: ['Slice Pala bread.', 'Add fresh mozzarella.', 'Toast or bake as required.', 'AFTER BAKING: Layer Italian mortadella generously.'] },
@@ -758,12 +760,12 @@
     });
   }
 
-  // --- PREP LINE BLITZ GAME LOGIC (INSTANT AUTO-ADVANCE) ---
+  // --- PREP LINE BLITZ GAME LOGIC (FLEXIBLE SELECT + SERVE BUTTON) ---
   let gameScore = 0;
   let gameTime = 60;
   let blitzTimer = null;
   let currentOrderIngredients = [];
-  let currentStepIndex = 0;
+  let selectedIngredients = [];
   let isShowingAnswer = false;
 
   function showGameMenu() {
@@ -802,7 +804,7 @@
 
   function nextOrder() {
     isShowingAnswer = false;
-    currentStepIndex = 0;
+    selectedIngredients = [];
     document.getElementById('game-feedback').innerText = '';
     
     let keys = Object.keys(preparingData);
@@ -813,33 +815,21 @@
     document.getElementById('ticket-num').innerText = Math.floor(Math.random() * 900) + 100;
     currentOrderIngredients = order.ingredients;
     
-    let options = [...currentOrderIngredients];
-    let allOthers = allIngredients.filter(i => !options.includes(i));
+    // Pick 3 or 4 extra dummy items
+    let allOthers = allIngredients.filter(i => !currentOrderIngredients.includes(i));
     allOthers = allOthers.sort(() => 0.5 - Math.random());
+    let numDummies = Math.floor(Math.random() * 2) + 3; // 3 or 4 dummies
+    let dummies = allOthers.slice(0, numDummies);
     
-    let dummies = [];
-    while(dummies.length < (12 - options.length) && allOthers.length > 0) {
-      dummies.push(allOthers.pop());
-    }
+    // Start with correct items in step order, then randomly insert 3-4 dummies
+    let gridArray = [...currentOrderIngredients];
+    dummies.forEach(dummy => {
+      let insertPos = Math.floor(Math.random() * (gridArray.length + 1));
+      gridArray.splice(insertPos, 0, dummy);
+    });
     
-    // Create grid and guarantee chronological left-to-right alignment for correct items
-    let gridArray = new Array(12).fill(null);
-    let indices = [];
-    while(indices.length < options.length) {
-      let r = Math.floor(Math.random() * 12);
-      if(!indices.includes(r)) indices.push(r);
-    }
-    indices.sort((a,b) => a - b);
-    
-    for(let i=0; i<options.length; i++) {
-      gridArray[indices[i]] = options[i];
-    }
-    
-    for(let i=0; i<12; i++) {
-      if(gridArray[i] === null) gridArray[i] = dummies.pop();
-    }
-    
-    const grid = document.getElementById('game-ingredients-grid'); grid.innerHTML = '';
+    const grid = document.getElementById('game-ingredients-grid'); 
+    grid.innerHTML = '';
     
     gridArray.forEach(ing => {
       let btn = document.createElement('button');
@@ -847,32 +837,32 @@
       btn.dataset.ing = ing; 
       btn.innerText = ing;
       btn.onclick = function() {
-        if(isShowingAnswer || this.classList.contains('active')) return;
-        handleIngredientClick(this, ing);
+        if(isShowingAnswer) return;
+        triggerHaptic(20);
+        this.classList.toggle('active');
+        if(selectedIngredients.includes(ing)) {
+          selectedIngredients = selectedIngredients.filter(i => i !== ing);
+        } else {
+          selectedIngredients.push(ing);
+        }
       };
       grid.appendChild(btn);
     });
   }
 
-  function handleIngredientClick(btn, clickedName) {
-    let expectedName = currentOrderIngredients[currentStepIndex];
+  function checkOrder() {
+    if(isShowingAnswer) return;
     
-    if (clickedName === expectedName) {
-      // CORRECT SEQUENCE
-      triggerHaptic(20);
-      btn.classList.add('active');
-      currentStepIndex++;
-      
-      if (currentStepIndex === currentOrderIngredients.length) {
-        // FULL ORDER COMPLETE
-        triggerHaptic(40); gameScore += 100; gameTime += 5; 
-        document.getElementById('game-score').innerText = gameScore;
-        document.getElementById('game-play').classList.add('fade-in');
-        setTimeout(() => document.getElementById('game-play').classList.remove('fade-in'), 400);
-        nextOrder();
-      }
+    let isCorrect = (selectedIngredients.length === currentOrderIngredients.length) && 
+                    currentOrderIngredients.every(ing => selectedIngredients.includes(ing));
+    
+    if(isCorrect) {
+      triggerHaptic(40); gameScore += 100; gameTime += 5; 
+      document.getElementById('game-score').innerText = gameScore;
+      document.getElementById('game-play').classList.add('fade-in');
+      setTimeout(() => document.getElementById('game-play').classList.remove('fade-in'), 400);
+      nextOrder();
     } else {
-      // WRONG ITEM OR WRONG SEQUENCE
       if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
       isShowingAnswer = true;
       gameScore = Math.max(0, gameScore - 25); gameTime -= 2; 
@@ -885,19 +875,16 @@
       setTimeout(() => grid.style.transform = "translateX(10px)", 200); 
       setTimeout(() => grid.style.transform = "translateX(0)", 300);
       
-      document.getElementById('game-feedback').innerText = 'Mistake! Memorize the right sequence.';
+      document.getElementById('game-feedback').innerText = 'Incorrect! Check correct ingredients.';
 
-      // Reveal correct sequence dynamically
+      // Highlight correct items so they can review
       Array.from(grid.children).forEach(b => {
          let ingName = b.dataset.ing;
-         let correctIndex = currentOrderIngredients.indexOf(ingName);
-         if (correctIndex !== -1) {
+         if (currentOrderIngredients.includes(ingName)) {
            b.classList.add('active');
-           b.innerText = (correctIndex + 1) + ". " + ingName;
            b.style.background = 'var(--accent-prep)'; 
            b.style.borderColor = 'var(--accent-prep)';
            b.style.color = '#fff';
-           b.style.opacity = '1';
          } else {
            b.style.opacity = '0.2';
          }
@@ -905,7 +892,7 @@
       
       setTimeout(() => {
         if (gameTime > 0) nextOrder();
-      }, 2500); // Gives them 2.5s to memorize it
+      }, 2000); 
     }
   }
 
