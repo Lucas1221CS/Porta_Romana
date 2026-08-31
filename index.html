@@ -469,7 +469,7 @@
   function verifyAdminPin() {
     triggerHaptic(20);
     const input = document.getElementById('admin-pin').value;
-    if (input === 'Portaromana@1234') {
+    if (input === '1234') {
       document.getElementById('admin-modal').classList.add('hidden');
       if (pendingAdminAction) pendingAdminAction();
     } else {
@@ -569,7 +569,7 @@
     ]
   };
 
-  const staffList = ['Alice', 'David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
+  const staffList = ['David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
   let rosterData = JSON.parse(localStorage.getItem('rosterData')) || defaultRoster;
   let isEditMode = false;
   let activeCellEdit = null;
