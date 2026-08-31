@@ -103,8 +103,8 @@
   .pin-input:focus { border-color: var(--accent-admin); background: rgba(255,255,255,0.05); }
 
   /* Staff & Game Picker Grid */
-  .staff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; max-height: 50vh; overflow-y: auto; padding: 5px;}
-  .staff-btn { background: var(--item-bg); border: 1px solid var(--glass-border); padding: 14px; border-radius: 14px; color: var(--text-main); font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.95em;}
+  .staff-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; max-height: 50vh; overflow-y: auto; padding: 5px;}
+  .staff-btn { background: var(--item-bg); border: 1px solid var(--glass-border); padding: 10px 5px; border-radius: 14px; color: var(--text-main); font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.75em; text-align: center; line-height: 1.3;}
   .staff-btn.active { background: var(--accent-train); border-color: var(--accent-train); color: white; box-shadow: 0 4px 12px rgba(114,9,183,0.3); }
 
   /* --- SCHEDULE & DUTIES --- */
@@ -189,6 +189,7 @@
 </head>
 <body>
 
+<!-- ADMIN PASSWORD MODAL -->
 <div id="admin-modal" class="modal-overlay hidden">
   <div class="modal-card">
     <h2 style="color: var(--text-main); margin-bottom: 20px;">Admin Access</h2>
@@ -198,17 +199,19 @@
   </div>
 </div>
 
+<!-- STAFF PICKER MODAL -->
 <div id="staff-modal" class="modal-overlay hidden" style="z-index: 21000;">
   <div class="modal-card">
     <h2 style="color: var(--text-main); margin-bottom: 20px;">Assign Staff</h2>
-    <div id="staff-grid" class="staff-grid"></div>
+    <div id="staff-grid" class="staff-grid" style="grid-template-columns: 1fr 1fr;"></div>
     <button class="btn btn-admin" onclick="confirmStaffPicker()">Confirm Shift</button>
     <button class="btn btn-ghost" onclick="closeStaffPicker()">Cancel</button>
   </div>
 </div>
 
 <div id="dynamic-island" class="hidden">
-  </div>
+  <!-- Active timers injected here -->
+</div>
 
 <div class="card" id="app-container">
   <div class="header-container">
@@ -227,6 +230,7 @@
         </div>
       </div>
       
+      <!-- REQUIRES ADMIN PIN -->
       <div class="home-card" onclick="requestAdminAccess(() => showMenu('baking'))">
         <div class="card-icon icon-bake">🔥</div>
         <div class="card-content">
@@ -254,6 +258,7 @@
         </div>
       </div>
       
+      <!-- REQUIRES ADMIN PIN -->
       <div class="home-card" onclick="requestAdminAccess(showInventoryMenu)">
         <div class="card-icon icon-admin">🛑</div>
         <div class="card-content">
@@ -268,6 +273,7 @@
     </div>
   </div>
 
+  <!-- --- ROSTER & CLEANING SCREEN --- -->
   <div id="roster-screen" class="hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="color: var(--text-main); margin: 0;">Roster & Duties</h2>
@@ -339,6 +345,7 @@
     <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
   </div>
 
+  <!-- PREP LINE BLITZ GAME -->
   <div id="game-screen" class="hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="color: var(--text-main); margin: 0;">Prep Line Blitz</h2>
@@ -346,7 +353,7 @@
     </div>
     
     <div id="game-intro">
-      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear as many tickets as possible. Tap the exact ingredients needed for the order <strong>in the correct sequence</strong>. Correct orders give you +5 seconds. Incorrect orders lose 25 points and -2 seconds. Go!</p>
+      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear as many tickets as possible. Tap the exact ingredients needed for the order <strong>in the correct chronological sequence</strong>. Correct sequences auto-complete and give +5 seconds. Mistakes lose 25 points and -2 seconds. Go!</p>
       <button class="btn btn-train" onclick="startGame()">▶️ Start Rush</button>
     </div>
 
@@ -356,15 +363,18 @@
         <span style="color: var(--accent-bake);" id="game-timer">60s</span>
       </div>
       
+      <!-- Ticket Stub -->
       <div class="ticket-stub" style="background: #fff; color: #111; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; border-left: 5px dashed #ccc; border-right: 5px dashed #ccc; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
         <p style="margin: 0; font-size: 0.75em; text-transform: uppercase; color: #555; font-weight: 700; letter-spacing: 1px;">Table Ticket #<span id="ticket-num">101</span></p>
         <h1 id="game-order-title" style="margin: 10px 0 0 0; color: #111; font-size: 1.5em; letter-spacing: -0.5px;">Pizza Name</h1>
       </div>
 
-      <div id="game-ingredients-grid" class="staff-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px; max-height: none; overflow: visible;">
-        </div>
+      <div id="game-ingredients-grid" class="staff-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px; max-height: none; overflow: visible; margin-bottom: 5px;">
+        <!-- Dynamic Ingredients Injected Here -->
+      </div>
       
-      <button class="btn btn-train" style="margin-top: 15px;" onclick="checkOrder()">🔔 Serve Order</button>
+      <!-- Feedback Text -->
+      <div id="game-feedback" style="margin-top: 10px; margin-bottom: 15px; color: var(--accent); font-weight: 700; text-align: center; height: 24px;"></div>
     </div>
 
     <div id="game-over" class="hidden" style="text-align: center;">
@@ -469,7 +479,7 @@
   function verifyAdminPin() {
     triggerHaptic(20);
     const input = document.getElementById('admin-pin').value;
-    if (input === '1234') {
+    if (input === 'Portaromana@1234') {
       document.getElementById('admin-modal').classList.add('hidden');
       if (pendingAdminAction) pendingAdminAction();
     } else {
@@ -488,7 +498,7 @@
   const preparingData = {
     'prep_p1': { title: '1. ILDE', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Gorgonzola', 'Red Onions', 'Salami'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put gorgonzola cheese.', 'Put onions.', 'Put salami.', 'Bake for 4 minutes.'] },
     'prep_p2': { title: '2. Margherita', type: 'pizza', ingredients: ['San Marzano DOP Peeled Tomatoes', 'Mozzarella'], steps: ['Put San Marzano tomatoes.', 'Put mozzarella cheese.', 'Bake for 4 minutes.'] },
-    'prep_p3': { title: '3. PARMA', type: 'pizza', ingredients: ['Tomato Sauce', 'Confit Tomatoes', 'Stracciatella', 'Parma Ham'], steps: ['Put tomato sauce.', 'Put tomato confit.', 'Bake for 4 minutes.', 'AFTER BAKING: Put Parma ham.', 'AFTER BAKING: Put stracciatella cheese.'] },
+    'prep_p3': { title: '3. PARMA', type: 'pizza', ingredients: ['Tomato Sauce', 'Confit Tomatoes', 'Parma Ham', 'Stracciatella'], steps: ['Put tomato sauce.', 'Put tomato confit.', 'Bake for 4 minutes.', 'AFTER BAKING: Put Parma ham.', 'AFTER BAKING: Put stracciatella cheese.'] },
     'prep_p4': { title: '4. SIMPLY COTTO', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Cooked Ham'], steps: ['Put tomato sauce.', 'Put mozzarella cheese.', 'Put cooked ham.', 'Bake for 4 minutes.'] },
     'prep_p5': { title: '5. GUANCIALE', type: 'pizza', ingredients: ['Tomato Sauce', 'Crispy Guanciale', 'Grana Padano'], steps: ['Put tomato sauce.', 'Put crispy guanciale.', 'Bake for 4 minutes.', 'AFTER BAKING: Put Grana Padano cheese.'] },
     'prep_p6': { title: '6. VEGETARIAN', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Pesto genovese', 'Confit Tomatoes'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put six spots of pesto genovese.', 'Put tomato confit on top of the pesto sauce.', 'Bake for 4 minutes.'] },
@@ -498,28 +508,30 @@
     'prep_p10': { title: '10. MARINARA', type: 'pizza', ingredients: ['Tomato Sauce', 'Garlic'], steps: ['Put tomato sauce.', 'Put garlic.', 'Bake for 4 minutes.'] },
     'prep_p11': { title: '11. ITALIAN MEATBALLS', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Homemade Spicy Sauce', 'Italian-Style Meatballs', 'Parmesan'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put spicy sauce.', 'Put meatballs.', 'Bake for 4 minutes.', 'AFTER BAKING: Put parmesan.'] },
     'prep_p12': { title: '12. PIZZA OLIVE', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Olives'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put olives.', 'Bake for 4 minutes.'] },
-    'prep_p13': { title: '13. PIZZA TUNA AND ONIONS', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Tuna', 'Red Onions'], steps: ['Mix tuna, red onions, oregano, and oil in a separate bowl.', 'Put tomato sauce.', 'Put mozzarella.', 'Put the tuna mixture on top.', 'Bake for 4 minutes.'] },
+    'prep_p13': { title: '13. PIZZA TUNA AND ONIONS', type: 'pizza', ingredients: ['Tuna', 'Red Onions', 'Tomato Sauce', 'Mozzarella'], steps: ['Mix tuna, red onions, oregano, and oil in a separate bowl.', 'Put tomato sauce.', 'Put mozzarella.', 'Put the tuna mixture on top.', 'Bake for 4 minutes.'] },
     'prep_p14': { title: '14. STRACCIATELLA & ANCHOVIES', type: 'pizza', ingredients: ['Tomato Sauce', 'Anchovies', 'Stracciatella'], steps: ['Put tomato sauce.', 'Put anchovies.', 'Bake for 4 minutes.', 'AFTER BAKING: Put stracciatella.'] },
     'prep_p15': { title: '15. SPICY HAWAIIAN', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Pineapple', 'Red Onions', 'Chili'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put pineapple, onions, and chili.', 'Bake for 4 minutes.'] },
     'prep_p16': { title: '16. SUPER PORK', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Italian Sausage', 'Grilled Peppers', 'Crispy Guanciale'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put Italian sausage and grilled bell-peppers.', 'Put guanciale.', 'Bake for 4 minutes.'] },
     'prep_p17': { title: '17. PEPPER SMOKED PIZZA', type: 'pizza', ingredients: ['Smoked Provola', 'Vesuvius Tomatoes', 'Thai Black Pepper'], steps: ['Put smoked provola cheese.', 'Put Vesuvius tomatoes.', 'Put Thai black pepper.', 'Bake for 4 minutes.'] },
     'prep_p18': { title: '18. MARINARA EVOLUTION', type: 'pizza', ingredients: ['Marinara Sauce', 'Anchovies', 'Confit Tomatoes', 'Capers', 'Garlic'], steps: ['Put marinara sauce.', 'Put anchovies.', 'Put confit tomatoes.', 'Put capers and garlic.', 'Bake for 4 minutes.'] },
-    'prep_p19': { title: '19. TASTYGARDEN', type: 'pizza', ingredients: ['Baked Potatoes', 'Rosemary', 'Garlic', 'Grilled Peppers', 'Smoked Provola'], steps: ['Put smoked provola.', 'Put baked potatoes and grilled peppers.', 'Put rosemary and garlic.', 'Bake for 4 minutes.'] },
+    'prep_p19': { title: '19. TASTYGARDEN', type: 'pizza', ingredients: ['Smoked Provola', 'Baked Potatoes', 'Grilled Peppers', 'Rosemary', 'Garlic'], steps: ['Put smoked provola.', 'Put baked potatoes and grilled peppers.', 'Put rosemary and garlic.', 'Bake for 4 minutes.'] },
     'prep_p20': { title: '20. SAUSAGE AND BURRATA', type: 'pizza', ingredients: ['Tomato Sauce', 'Italian Sausage', 'Burrata'], steps: ['Put tomato sauce.', 'Put sausage.', 'Bake for 4 minutes.', 'AFTER BAKING: Put fresh burrata.'] },
     'prep_p21': { title: '21. SPICY CHICKEN PIZZA', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Tomatoes', 'Grilled Chicken', 'Homemade Spicy Sauce'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put tomatoes.', 'Put chicken.', 'Bake for 4 minutes.', 'AFTER BAKING: Put spicy sauce.'] },
     'prep_p22': { title: '22. CALZONE HAM AND CHEESE', type: 'pizza', ingredients: ['Tomato Sauce', 'Cooked Ham', 'Mozzarella', 'Parmesan'], steps: ['Fold dough.', 'Put tomato sauce inside.', 'Put cooked ham and mozzarella inside.', 'Top with parmesan.', 'Bake for 4 minutes.'] },
-    'prep_pa1': { title: '1. PARIGINA', type: 'panini', ingredients: ['Pala Bread', 'Cooked Ham', 'Mozzarella', 'Tomato Sauce'], steps: ['Slice Pala bread.', 'Add tomato sauce.', 'Add cooked ham and mozzarella.', 'Toast or bake as required.'] },
-    'prep_pa2': { title: '2. ITALIAN SAUSAGE', type: 'panini', ingredients: ['Pala Bread', 'Italian Sausage', 'Oven-Stewed Onions', 'Homemade Spicy Sauce'], steps: ['Slice Pala bread.', 'Add Italian sausage and stewed onions.', 'Add spicy homemade sauce.', 'Toast or bake as required.'] },
-    'prep_pa3': { title: '3. MORTADELLA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Mortadella', 'Mozzarella'], steps: ['Slice Pala bread.', 'Add fresh mozzarella.', 'Layer Italian mortadella generously.', 'Toast or bake as required.'] },
-    'prep_pa4': { title: '4. SPICY TUNA', type: 'panini', ingredients: ['Pala Bread', 'Tuna', 'Confit Tomatoes', 'Mayonnaise', 'Red Onions', 'Homemade Spicy Sauce'], steps: ['Slice Pala bread.', 'Mix tuna with mayo, onions, and spicy sauce.', 'Add confit tomatoes.', 'Toast or bake as required.'] },
-    'prep_pa5': { title: '5. COPPA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Cured Pork Collar (Coppa)', 'Brie'], steps: ['Slice Pala bread.', 'Add slices of French Brie.', 'Layer cured pork collar (Coppa).', 'Toast or bake as required.'] },
-    'prep_pa6': { title: '6. PEPERRONI SPICY', type: 'panini', ingredients: ['Pala Bread', 'Salami', 'Spicy Pepper Garlic Sauce', 'Mozzarella', 'Gorgonzola'], steps: ['Slice Pala bread.', 'Spread spicy pepper garlic sauce.', 'Add mozzarella and gorgonzola.', 'Layer Italian salami.', 'Toast or bake as required.'] },
-    'prep_pa7': { title: '7. TARTUFINO', type: 'panini', ingredients: ['Pala Bread', 'Cooked Ham', 'Brie', 'Truffle Mayonnaise'], steps: ['Slice Pala bread.', 'Spread truffle mayo evenly.', 'Add Italian Brie and cooked ham.', 'Toast or bake as required.'] },
-    'prep_pa8': { title: '8. HAM & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Cooked Ham', 'Mozzarella'], steps: ['Slice Pala bread.', 'Add mozzarella cheese.', 'Layer Italian cooked ham.', 'Toast or bake as required.'] },
-    'prep_pa9': { title: '9. PARMA HAM & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Parma Ham', 'Mozzarella'], steps: ['Slice Pala bread.', 'Add mozzarella cheese.', 'Layer Italian Parma ham.', 'Toast or bake as required.'] },
-    'prep_pa10': { title: '10. CHICKEN SANDWICH', type: 'panini', ingredients: ['Pala Bread', 'Grilled Chicken', 'Mozzarella', 'Homemade Spicy Sauce', 'Mayonnaise'], steps: ['Slice Pala bread.', 'Mix mayo and spicy homemade sauce.', 'Add mozzarella and grilled chicken.', 'Toast or bake as required.'] },
-    'prep_pa11': { title: '11. BURRATA & PARMA HAM', type: 'panini', ingredients: ['Pala Bread', 'Burrata', 'Parma Ham'], steps: ['Slice Pala bread.', 'Add premium Parma ham.', 'Top with fresh burrata cheese.', 'Toast or bake as required.'] },
-    'prep_pa12': { title: '12. BUTTER & ANCHOVIES', type: 'panini', ingredients: ['Pala Bread', 'Butter', 'Anchovies', 'Fresh Lemon Zest', 'Mozzarella'], steps: ['Slice Pala bread.', 'Spread butter and add mozzarella.', 'Layer anchovies and garnish with lemon zest.', 'Toast or bake as required.'] }
+    
+    // UPDATED PALA RECIPES (HOT VS COLD PREP)
+    'prep_pa1': { title: '1. PARIGINA', type: 'panini', ingredients: ['Pala Bread', 'Tomato Sauce', 'Cooked Ham', 'Mozzarella'], steps: ['Slice Pala bread.', 'Add tomato sauce.', 'Add cooked ham and mozzarella.', 'Toast or bake as required.'] },
+    'prep_pa2': { title: '2. ITALIAN SAUSAGE', type: 'panini', ingredients: ['Pala Bread', 'Italian Sausage', 'Oven-Stewed Onions', 'Homemade Spicy Sauce'], steps: ['Slice Pala bread.', 'Add Italian sausage and stewed onions.', 'Toast or bake as required.', 'AFTER BAKING: Add spicy homemade sauce.'] },
+    'prep_pa3': { title: '3. MORTADELLA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Mozzarella', 'Mortadella'], steps: ['Slice Pala bread.', 'Add fresh mozzarella.', 'Toast or bake as required.', 'AFTER BAKING: Layer Italian mortadella generously.'] },
+    'prep_pa4': { title: '4. SPICY TUNA', type: 'panini', ingredients: ['Pala Bread', 'Tuna', 'Mayonnaise', 'Red Onions', 'Homemade Spicy Sauce', 'Confit Tomatoes'], steps: ['Slice Pala bread.', 'Toast or bake as required.', 'AFTER BAKING: Mix tuna with mayo, onions, and spicy sauce.', 'AFTER BAKING: Add confit tomatoes.'] },
+    'prep_pa5': { title: '5. COPPA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Brie', 'Cured Pork Collar (Coppa)'], steps: ['Slice Pala bread.', 'Add slices of French Brie.', 'Toast or bake as required.', 'AFTER BAKING: Layer cured pork collar (Coppa).'] },
+    'prep_pa6': { title: '6. PEPERRONI SPICY', type: 'panini', ingredients: ['Pala Bread', 'Spicy Pepper Garlic Sauce', 'Mozzarella', 'Gorgonzola', 'Salami'], steps: ['Slice Pala bread.', 'Spread spicy pepper garlic sauce.', 'Add mozzarella and gorgonzola.', 'Layer Italian salami.', 'Toast or bake as required.'] },
+    'prep_pa7': { title: '7. TARTUFINO', type: 'panini', ingredients: ['Pala Bread', 'Brie', 'Cooked Ham', 'Truffle Mayonnaise'], steps: ['Slice Pala bread.', 'Add Italian Brie and cooked ham.', 'Toast or bake as required.', 'AFTER BAKING: Spread truffle mayo evenly.'] },
+    'prep_pa8': { title: '8. HAM & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Mozzarella', 'Cooked Ham'], steps: ['Slice Pala bread.', 'Add mozzarella cheese.', 'Layer Italian cooked ham.', 'Toast or bake as required.'] },
+    'prep_pa9': { title: '9. PARMA HAM & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Mozzarella', 'Parma Ham'], steps: ['Slice Pala bread.', 'Add mozzarella cheese.', 'Toast or bake as required.', 'AFTER BAKING: Layer Italian Parma ham.'] },
+    'prep_pa10': { title: '10. CHICKEN SANDWICH', type: 'panini', ingredients: ['Pala Bread', 'Mozzarella', 'Grilled Chicken', 'Mayonnaise', 'Homemade Spicy Sauce'], steps: ['Slice Pala bread.', 'Add mozzarella and grilled chicken.', 'Toast or bake as required.', 'AFTER BAKING: Mix mayo and spicy homemade sauce.'] },
+    'prep_pa11': { title: '11. BURRATA & PARMA HAM', type: 'panini', ingredients: ['Pala Bread', 'Parma Ham', 'Burrata'], steps: ['Slice Pala bread.', 'Toast or bake as required.', 'AFTER BAKING: Add premium Parma ham.', 'AFTER BAKING: Top with fresh burrata cheese.'] },
+    'prep_pa12': { title: '12. BUTTER & ANCHOVIES', type: 'panini', ingredients: ['Pala Bread', 'Mozzarella', 'Butter', 'Anchovies', 'Fresh Lemon Zest'], steps: ['Slice Pala bread.', 'Add mozzarella.', 'Toast or bake as required.', 'AFTER BAKING: Spread butter.', 'AFTER BAKING: Layer anchovies and garnish with lemon zest.'] }
   };
 
   const bakingData = {
@@ -539,6 +551,8 @@
   function isItem86(itemObj) { return itemObj.ingredients && itemObj.ingredients.some(ing => outOfStock.includes(ing)); }
 
   // --- EDITABLE ROSTER DATABASE & PICKER ---
+  const staffList = ['Alice', 'David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
+  
   const defaultRoster = {
     main: [
       ['Monday', 'Jerry', 'Willow', 'Min', 'Zar, Lucas', 'Lyn, Seint'],
@@ -569,7 +583,6 @@
     ]
   };
 
-  const staffList = ['David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
   let rosterData = JSON.parse(localStorage.getItem('rosterData')) || defaultRoster;
   let isEditMode = false;
   let activeCellEdit = null;
@@ -745,12 +758,13 @@
     });
   }
 
-  // --- PREP LINE BLITZ GAME LOGIC (ORDERED SEQUENCE) ---
+  // --- PREP LINE BLITZ GAME LOGIC (INSTANT AUTO-ADVANCE) ---
   let gameScore = 0;
   let gameTime = 60;
   let blitzTimer = null;
   let currentOrderIngredients = [];
-  let selectedIngredients = [];
+  let currentStepIndex = 0;
+  let isShowingAnswer = false;
 
   function showGameMenu() {
     triggerHaptic(30); 
@@ -787,7 +801,10 @@
   }
 
   function nextOrder() {
-    selectedIngredients = [];
+    isShowingAnswer = false;
+    currentStepIndex = 0;
+    document.getElementById('game-feedback').innerText = '';
+    
     let keys = Object.keys(preparingData);
     let randomKey = keys[Math.floor(Math.random() * keys.length)];
     let order = preparingData[randomKey];
@@ -800,68 +817,95 @@
     let allOthers = allIngredients.filter(i => !options.includes(i));
     allOthers = allOthers.sort(() => 0.5 - Math.random());
     
-    while(options.length < 12 && allOthers.length > 0) { options.push(allOthers.pop()); }
-    options = options.sort(() => 0.5 - Math.random());
+    let dummies = [];
+    while(dummies.length < (12 - options.length) && allOthers.length > 0) {
+      dummies.push(allOthers.pop());
+    }
+    
+    // Create grid and guarantee chronological left-to-right alignment for correct items
+    let gridArray = new Array(12).fill(null);
+    let indices = [];
+    while(indices.length < options.length) {
+      let r = Math.floor(Math.random() * 12);
+      if(!indices.includes(r)) indices.push(r);
+    }
+    indices.sort((a,b) => a - b);
+    
+    for(let i=0; i<options.length; i++) {
+      gridArray[indices[i]] = options[i];
+    }
+    
+    for(let i=0; i<12; i++) {
+      if(gridArray[i] === null) gridArray[i] = dummies.pop();
+    }
     
     const grid = document.getElementById('game-ingredients-grid'); grid.innerHTML = '';
     
-    options.forEach(ing => {
+    gridArray.forEach(ing => {
       let btn = document.createElement('button');
       btn.className = 'staff-btn';
-      btn.dataset.ing = ing;
-      btn.style.fontSize = '0.75em'; btn.style.padding = '10px 5px'; btn.style.textAlign = 'center'; btn.style.lineHeight = '1.3';
+      btn.dataset.ing = ing; 
       btn.innerText = ing;
       btn.onclick = function() {
-        triggerHaptic(20); 
-        if(selectedIngredients.includes(ing)) {
-          selectedIngredients = selectedIngredients.filter(i => i !== ing);
-          this.classList.remove('active');
-        } else {
-          selectedIngredients.push(ing);
-          this.classList.add('active');
-        }
-        updateGameGridNumbers();
+        if(isShowingAnswer || this.classList.contains('active')) return;
+        handleIngredientClick(this, ing);
       };
       grid.appendChild(btn);
     });
   }
 
-  function updateGameGridNumbers() {
-    const grid = document.getElementById('game-ingredients-grid');
-    Array.from(grid.children).forEach(btn => {
-      let baseName = btn.dataset.ing;
-      let idx = selectedIngredients.indexOf(baseName);
-      if(idx > -1) {
-        btn.innerText = (idx + 1) + '. ' + baseName;
-      } else {
-        btn.innerText = baseName;
-      }
-    });
-  }
-
-  function checkOrder() {
-    // Validate that the array values AND the exact order match
-    let isCorrect = JSON.stringify(selectedIngredients) === JSON.stringify(currentOrderIngredients);
+  function handleIngredientClick(btn, clickedName) {
+    let expectedName = currentOrderIngredients[currentStepIndex];
     
-    if(isCorrect) {
-      triggerHaptic(40); gameScore += 100; gameTime += 5; 
-      document.getElementById('game-score').innerText = gameScore;
-      document.getElementById('game-play').classList.add('fade-in');
-      setTimeout(() => document.getElementById('game-play').classList.remove('fade-in'), 400);
-      nextOrder();
+    if (clickedName === expectedName) {
+      // CORRECT SEQUENCE
+      triggerHaptic(20);
+      btn.classList.add('active');
+      currentStepIndex++;
+      
+      if (currentStepIndex === currentOrderIngredients.length) {
+        // FULL ORDER COMPLETE
+        triggerHaptic(40); gameScore += 100; gameTime += 5; 
+        document.getElementById('game-score').innerText = gameScore;
+        document.getElementById('game-play').classList.add('fade-in');
+        setTimeout(() => document.getElementById('game-play').classList.remove('fade-in'), 400);
+        nextOrder();
+      }
     } else {
+      // WRONG ITEM OR WRONG SEQUENCE
       if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+      isShowingAnswer = true;
       gameScore = Math.max(0, gameScore - 25); gameTime -= 2; 
       document.getElementById('game-score').innerText = gameScore;
       document.getElementById('game-timer').innerText = gameTime + 's';
+      
       let grid = document.getElementById('game-ingredients-grid');
       grid.style.transform = "translateX(10px)";
-      setTimeout(() => grid.style.transform = "translateX(-10px)", 100); setTimeout(() => grid.style.transform = "translateX(10px)", 200); setTimeout(() => grid.style.transform = "translateX(0)", 300);
+      setTimeout(() => grid.style.transform = "translateX(-10px)", 100); 
+      setTimeout(() => grid.style.transform = "translateX(10px)", 200); 
+      setTimeout(() => grid.style.transform = "translateX(0)", 300);
       
-      // Clear incorrect selection so they can restart immediately
-      selectedIngredients = [];
-      updateGameGridNumbers();
-      Array.from(grid.children).forEach(b => b.classList.remove('active'));
+      document.getElementById('game-feedback').innerText = 'Mistake! Memorize the right sequence.';
+
+      // Reveal correct sequence dynamically
+      Array.from(grid.children).forEach(b => {
+         let ingName = b.dataset.ing;
+         let correctIndex = currentOrderIngredients.indexOf(ingName);
+         if (correctIndex !== -1) {
+           b.classList.add('active');
+           b.innerText = (correctIndex + 1) + ". " + ingName;
+           b.style.background = 'var(--accent-prep)'; 
+           b.style.borderColor = 'var(--accent-prep)';
+           b.style.color = '#fff';
+           b.style.opacity = '1';
+         } else {
+           b.style.opacity = '0.2';
+         }
+      });
+      
+      setTimeout(() => {
+        if (gameTime > 0) nextOrder();
+      }, 2500); // Gives them 2.5s to memorize it
     }
   }
 
