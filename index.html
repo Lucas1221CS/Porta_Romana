@@ -346,7 +346,7 @@
     </div>
     
     <div id="game-intro">
-      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear as many tickets as possible. Tap the exact ingredients needed for the order. Correct orders give you +5 seconds. Incorrect orders lose 25 points and -2 seconds. Go!</p>
+      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear as many tickets as possible. Tap the exact ingredients needed for the order <strong>in the correct sequence</strong>. Correct orders give you +5 seconds. Incorrect orders lose 25 points and -2 seconds. Go!</p>
       <button class="btn btn-train" onclick="startGame()">▶️ Start Rush</button>
     </div>
 
@@ -469,7 +469,7 @@
   function verifyAdminPin() {
     triggerHaptic(20);
     const input = document.getElementById('admin-pin').value;
-    if (input === '123456') {
+    if (input === 'Portaromana@1234') {
       document.getElementById('admin-modal').classList.add('hidden');
       if (pendingAdminAction) pendingAdminAction();
     } else {
@@ -745,7 +745,7 @@
     });
   }
 
-  // --- PREP LINE BLITZ GAME LOGIC ---
+  // --- PREP LINE BLITZ GAME LOGIC (ORDERED SEQUENCE) ---
   let gameScore = 0;
   let gameTime = 60;
   let blitzTimer = null;
@@ -808,19 +808,40 @@
     options.forEach(ing => {
       let btn = document.createElement('button');
       btn.className = 'staff-btn';
+      btn.dataset.ing = ing;
       btn.style.fontSize = '0.75em'; btn.style.padding = '10px 5px'; btn.style.textAlign = 'center'; btn.style.lineHeight = '1.3';
       btn.innerText = ing;
       btn.onclick = function() {
-        triggerHaptic(20); this.classList.toggle('active');
-        if(selectedIngredients.includes(ing)) selectedIngredients = selectedIngredients.filter(i => i !== ing);
-        else selectedIngredients.push(ing);
+        triggerHaptic(20); 
+        if(selectedIngredients.includes(ing)) {
+          selectedIngredients = selectedIngredients.filter(i => i !== ing);
+          this.classList.remove('active');
+        } else {
+          selectedIngredients.push(ing);
+          this.classList.add('active');
+        }
+        updateGameGridNumbers();
       };
       grid.appendChild(btn);
     });
   }
 
+  function updateGameGridNumbers() {
+    const grid = document.getElementById('game-ingredients-grid');
+    Array.from(grid.children).forEach(btn => {
+      let baseName = btn.dataset.ing;
+      let idx = selectedIngredients.indexOf(baseName);
+      if(idx > -1) {
+        btn.innerText = (idx + 1) + '. ' + baseName;
+      } else {
+        btn.innerText = baseName;
+      }
+    });
+  }
+
   function checkOrder() {
-    let isCorrect = (selectedIngredients.length === currentOrderIngredients.length) && selectedIngredients.every(val => currentOrderIngredients.includes(val));
+    // Validate that the array values AND the exact order match
+    let isCorrect = JSON.stringify(selectedIngredients) === JSON.stringify(currentOrderIngredients);
     
     if(isCorrect) {
       triggerHaptic(40); gameScore += 100; gameTime += 5; 
@@ -836,6 +857,11 @@
       let grid = document.getElementById('game-ingredients-grid');
       grid.style.transform = "translateX(10px)";
       setTimeout(() => grid.style.transform = "translateX(-10px)", 100); setTimeout(() => grid.style.transform = "translateX(10px)", 200); setTimeout(() => grid.style.transform = "translateX(0)", 300);
+      
+      // Clear incorrect selection so they can restart immediately
+      selectedIngredients = [];
+      updateGameGridNumbers();
+      Array.from(grid.children).forEach(b => b.classList.remove('active'));
     }
   }
 
