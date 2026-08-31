@@ -7,6 +7,10 @@
 <meta name="theme-color" content="#050505">
 <title>Porta Romana Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <style>
   /* PREMIUM HOSPITALITY DESIGN SYSTEM */
   :root {
@@ -53,7 +57,6 @@
     padding-top: 60px;
   }
   
-  /* --- DYNAMIC ISLAND GLOBAL TIMER --- */
   #dynamic-island {
     position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
     background: var(--card-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -80,7 +83,6 @@
   h3 { color: var(--text-muted); font-size: 0.85em; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-top: 25px; margin-bottom: 12px; padding-left: 5px;}
   ul { list-style-type: none; padding: 0; margin: 0; }
   
-  /* --- NEW PREMIUM HOME GRID --- */
   .home-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px;}
   .home-card { background: var(--item-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 18px; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .home-card:hover { transform: translateY(-3px); background: var(--item-hover); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
@@ -95,19 +97,16 @@
   .card-content h3 { margin: 0 0 4px 0; color: var(--text-main); font-size: 1.1em; letter-spacing: -0.2px; text-transform: none;}
   .card-content p { margin: 0; color: var(--text-muted); font-size: 0.85em; font-weight: 500;}
 
-  /* --- MODALS --- */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 20000; display: flex; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.3s ease;}
   .modal-overlay.hidden { opacity: 0; pointer-events: none; }
   .modal-card { background: var(--card-bg); padding: 30px; border-radius: 24px; text-align: center; width: 90%; max-width: 380px; border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
   .pin-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--item-bg); color: var(--text-main); font-size: 1.2em; text-align: center; margin-bottom: 20px; outline: none; transition: 0.3s; box-sizing: border-box;}
   .pin-input:focus { border-color: var(--accent-admin); background: rgba(255,255,255,0.05); }
 
-  /* Staff & Game Picker Grid */
   .staff-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; max-height: 50vh; overflow-y: auto; padding: 5px;}
   .staff-btn { background: var(--item-bg); border: 1px solid var(--glass-border); padding: 10px 5px; border-radius: 14px; color: var(--text-main); font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.75em; text-align: center; line-height: 1.3;}
   .staff-btn.active { background: var(--accent-train); border-color: var(--accent-train); color: white; box-shadow: 0 4px 12px rgba(114,9,183,0.3); }
 
-  /* --- SCHEDULE & DUTIES --- */
   .segmented-control { display: flex; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--glass-border);}
   .light-mode .segmented-control { background: rgba(0,0,0,0.05); }
   .seg-btn { flex: 1; border: none; background: transparent; color: var(--text-muted); padding: 10px; font-size: 0.9em; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
@@ -126,7 +125,6 @@
   
   .warning-banner { background: rgba(230, 57, 70, 0.15); border: 1px solid var(--accent); color: #ff6b6b; padding: 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600; margin-bottom: 15px; text-align: center; line-height: 1.4;}
 
-  /* --- EXISTING STYLES --- */
   .search-bar { width: 100%; padding: 16px 20px; border-radius: 20px; border: 1px solid var(--glass-border); background: var(--item-bg); color: var(--text-main); margin-bottom: 20px; font-size: 16px; box-sizing: border-box; outline: none; transition: all 0.3s ease; }
   .search-bar:focus { border-color: var(--accent); background: var(--card-bg); box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.15); }
   .search-bar::placeholder { color: var(--text-muted); }
@@ -230,7 +228,6 @@
         </div>
       </div>
       
-      <!-- REQUIRES ADMIN PIN -->
       <div class="home-card" onclick="requestAdminAccess(() => showMenu('baking'))">
         <div class="card-icon icon-bake">🔥</div>
         <div class="card-content">
@@ -258,7 +255,6 @@
         </div>
       </div>
       
-      <!-- REQUIRES ADMIN PIN -->
       <div class="home-card" onclick="requestAdminAccess(showInventoryMenu)">
         <div class="card-icon icon-admin">🛑</div>
         <div class="card-content">
@@ -273,7 +269,6 @@
     </div>
   </div>
 
-  <!-- --- ROSTER & CLEANING SCREEN --- -->
   <div id="roster-screen" class="hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="color: var(--text-main); margin: 0;">Roster & Duties</h2>
@@ -349,7 +344,7 @@
   <div id="game-screen" class="hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="color: var(--text-main); margin: 0;">Prep Line Blitz</h2>
-      <div id="high-score-display" style="color: var(--accent-train); font-weight: 700; font-size: 0.9em;">High Score: 0</div>
+      <div id="high-score-display" style="color: var(--accent-train); font-weight: 700; font-size: 0.9em;">High Score: 0 (None)</div>
     </div>
     
     <div id="game-intro">
@@ -363,19 +358,14 @@
         <span style="color: var(--accent-bake);" id="game-timer">60s</span>
       </div>
       
-      <!-- Ticket Stub -->
       <div class="ticket-stub" style="background: #fff; color: #111; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; border-left: 5px dashed #ccc; border-right: 5px dashed #ccc; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
         <p style="margin: 0; font-size: 0.75em; text-transform: uppercase; color: #555; font-weight: 700; letter-spacing: 1px;">Table Ticket #<span id="ticket-num">101</span></p>
         <h1 id="game-order-title" style="margin: 10px 0 0 0; color: #111; font-size: 1.5em; letter-spacing: -0.5px;">Pizza Name</h1>
       </div>
 
-      <div id="game-ingredients-grid" class="staff-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px; max-height: none; overflow: visible; margin-bottom: 10px;">
-        <!-- Dynamic Ingredients Injected Here -->
-      </div>
+      <div id="game-ingredients-grid" class="staff-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px; max-height: none; overflow: visible; margin-bottom: 10px;"></div>
       
-      <!-- Feedback Text -->
       <div id="game-feedback" style="margin-top: 5px; margin-bottom: 10px; color: var(--accent); font-weight: 700; text-align: center; height: 24px;"></div>
-      
       <button class="btn btn-train" onclick="checkOrder()">🔔 Serve Order</button>
     </div>
 
@@ -422,6 +412,21 @@
 </div>
 
 <script>
+  // --- FIREBASE INITIALIZATION ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyADPjKLs0qmYqferabHMNZesbC-6gjQ5Co",
+    authDomain: "porta-1558b.firebaseapp.com",
+    databaseURL: "https://porta-1558b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "porta-1558b",
+    storageBucket: "porta-1558b.firebasestorage.app",
+    messagingSenderId: "227027108601",
+    appId: "1:227027108601:web:1ac16ed6359b00484e5828"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then(() => { console.log('SW Registered'); });
   }
@@ -465,8 +470,8 @@
   document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock(); });
   function triggerHaptic(ms = 40) { if (navigator.vibrate) navigator.vibrate(ms); }
 
-  // --- ADMIN SECURITY SYSTEM ---
   let pendingAdminAction = null;
+  let currentCategory = '';
   
   function requestAdminAccess(actionFunction) {
     triggerHaptic(30);
@@ -496,7 +501,6 @@
     pendingAdminAction = null;
   }
 
-  // --- RECIPE DATA ---
   const preparingData = {
     'prep_p1': { title: '1. ILDE', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Gorgonzola', 'Red Onions', 'Salami'] },
     'prep_p2': { title: '2. Margherita', type: 'pizza', ingredients: ['San Marzano DOP Peeled Tomatoes', 'Mozzarella'] },
@@ -521,7 +525,6 @@
     'prep_p21': { title: '21. SPICY CHICKEN PIZZA', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Tomatoes', 'Grilled Chicken', 'Homemade Spicy Sauce'] },
     'prep_p22': { title: '22. CALZONE HAM AND CHEESE', type: 'pizza', ingredients: ['Tomato Sauce', 'Cooked Ham', 'Mozzarella', 'Parmesan'] },
     
-    // PALA RECIPES
     'prep_pa1': { title: '1. PARIGINA', type: 'panini', ingredients: ['Pala Bread', 'Tomato Sauce', 'Cooked Ham', 'Mozzarella'] },
     'prep_pa2': { title: '2. ITALIAN SAUSAGE', type: 'panini', ingredients: ['Pala Bread', 'Italian Sausage', 'Oven-Stewed Onions', 'Homemade Spicy Sauce'] },
     'prep_pa3': { title: '3. MORTADELLA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Mozzarella', 'Mortadella'] },
@@ -543,18 +546,42 @@
     'calc_biga': { title: 'Neapolitan Biga Calculator', type: 'calc' }
   };
 
-  // --- AUTOMATIC INVENTORY GENERATION ---
-  let outOfStock = JSON.parse(localStorage.getItem('86_list')) || [];
   let allIngredients = [];
   Object.values(preparingData).forEach(d => { if(d.ingredients) allIngredients.push(...d.ingredients); });
   Object.values(bakingData).forEach(d => { if(d.ingredients) allIngredients.push(...d.ingredients); });
   allIngredients = [...new Set(allIngredients)].sort();
 
+  // --- CLOUD 86 MANAGER ---
+  let outOfStock = [];
+  db.ref('inventory/86_list').on('value', (snapshot) => {
+    outOfStock = snapshot.val() || [];
+    
+    // Live update if screens are currently open
+    if (!document.getElementById('inventory-screen').classList.contains('hidden')) {
+      showInventoryMenu();
+    }
+    if (!document.getElementById('menu-screen').classList.contains('hidden') && currentCategory) {
+      showMenu(currentCategory);
+    }
+  });
+
   function isItem86(itemObj) { return itemObj.ingredients && itemObj.ingredients.some(ing => outOfStock.includes(ing)); }
 
-  // --- EDITABLE ROSTER DATABASE & PICKER ---
+  window.toggle86 = function(ing, element) {
+    triggerHaptic(40); 
+    let new86 = [...outOfStock];
+    if (new86.includes(ing)) { 
+      new86 = new86.filter(i => i !== ing); 
+    } else { 
+      new86.push(ing); 
+    }
+    // Push immediately to the cloud
+    db.ref('inventory/86_list').set(new86);
+  };
+
+
+  // --- CLOUD EDITABLE ROSTER ---
   const staffList = ['David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
-  
   const defaultRoster = {
     main: [
       ['Monday', 'Jerry', 'Willow', 'Min', 'Zar, Lucas', 'Lyn, Seint'],
@@ -585,14 +612,31 @@
     ]
   };
 
-  let rosterData = JSON.parse(localStorage.getItem('rosterData')) || defaultRoster;
+  let rosterData = defaultRoster;
   let isEditMode = false;
   let activeCellEdit = null;
+
+  db.ref('roster').on('value', (snapshot) => {
+    let data = snapshot.val();
+    if (data) {
+      rosterData = data;
+    } else {
+      // If DB is empty on first run, push the default structure
+      db.ref('roster').set(defaultRoster);
+      rosterData = defaultRoster;
+    }
+    
+    // Live update if roster screen is open
+    if (!document.getElementById('roster-screen').classList.contains('hidden')) {
+      renderRoster();
+    }
+  });
 
   function renderRoster() {
     ['main', 'thonglor', 'cleaning'].forEach(tab => {
       const tbody = document.getElementById(`tbody-${tab}`);
       tbody.innerHTML = '';
+      if(!rosterData[tab]) return;
       rosterData[tab].forEach((row, rIndex) => {
         let tr = document.createElement('tr');
         row.forEach((cellData, cIndex) => {
@@ -626,8 +670,10 @@
 
   function saveRoster() {
     triggerHaptic(40);
-    localStorage.setItem('rosterData', JSON.stringify(rosterData));
-    isEditMode = false; renderRoster();
+    // Push the updated roster straight to the cloud database
+    db.ref('roster').set(rosterData);
+    isEditMode = false; 
+    renderRoster();
   }
 
   function openStaffPicker(tab, r, c, currentData) {
@@ -685,7 +731,6 @@
     });
   }
 
-  // --- 86 MANAGER ---
   function showInventoryMenu() {
     document.getElementById('home-screen').classList.add('hidden'); document.getElementById('inventory-screen').classList.remove('hidden'); document.getElementById('inventory-screen').classList.add('fade-in');
     document.getElementById('inv-search').value = ''; const container = document.getElementById('inventory-list'); container.innerHTML = '';
@@ -697,14 +742,6 @@
     });
   }
 
-  window.toggle86 = function(ing, element) {
-    triggerHaptic(40); let row = element.parentElement;
-    if (outOfStock.includes(ing)) { outOfStock = outOfStock.filter(i => i !== ing); element.classList.remove('active'); row.classList.remove('is-86'); } 
-    else { outOfStock.push(ing); element.classList.add('active'); row.classList.add('is-86'); }
-    localStorage.setItem('86_list', JSON.stringify(outOfStock));
-  };
-
-  // --- GLOBAL TIMER LOGIC ---
   let globalTimers = {}; let globalTimerInterval = null;
 
   function toggleGlobalTimer(recipeId, stepIndex, mins, recipeTitle) {
@@ -760,13 +797,27 @@
     });
   }
 
-  // --- PREP LINE BLITZ GAME LOGIC ---
+
+  // --- CLOUD HIGH SCORE LOGIC ---
   let gameScore = 0;
   let gameTime = 60;
   let blitzTimer = null;
   let currentOrderIngredients = [];
   let selectedIngredients = [];
   let isShowingAnswer = false;
+  
+  let globalHighScore = 0;
+  let globalHighScorer = "None";
+
+  // Listen to the cloud leaderboard
+  db.ref('leaderboard/blitz').on('value', (snapshot) => {
+    let data = snapshot.val();
+    if (data) {
+      globalHighScore = data.score || 0;
+      globalHighScorer = data.name || "None";
+      document.getElementById('high-score-display').innerText = `High Score: ${globalHighScore} (${globalHighScorer})`;
+    }
+  });
 
   function showGameMenu() {
     triggerHaptic(30); 
@@ -778,8 +829,7 @@
     document.getElementById('game-play').classList.add('hidden');
     document.getElementById('game-over').classList.add('hidden');
     
-    let hs = localStorage.getItem('hs_blitz') || 0;
-    document.getElementById('high-score-display').innerText = 'High Score: ' + hs;
+    document.getElementById('high-score-display').innerText = `High Score: ${globalHighScore} (${globalHighScorer})`;
   }
 
   function startGame() {
@@ -814,10 +864,8 @@
     document.getElementById('game-order-title').innerText = order.title;
     document.getElementById('ticket-num').innerText = Math.floor(Math.random() * 900) + 100;
     
-    // REMOVE BREAD FROM REQUIRED GAME ANSWERS
     currentOrderIngredients = order.ingredients.filter(ing => ing !== 'Pala Bread');
     
-    // SYNONYM FILTER (Prevents confusing duplicate-style dummies)
     const synonymGroups = [
       ['Tomato Sauce', 'Marinara Sauce'],
       ['Burrata', 'Stracciatella'],
@@ -833,20 +881,16 @@
       });
     });
     
-    // Create pool of valid dummy items
     let allOthers = allIngredients.filter(i => 
       !currentOrderIngredients.includes(i) && 
       !excludeDummies.includes(i) && 
       i !== 'Pala Bread' &&
-      !i.toLowerCase().includes('dough') // Ensure baking doughs don't show up
+      !i.toLowerCase().includes('dough')
     );
     
     allOthers = allOthers.sort(() => 0.5 - Math.random());
-    
-    // Pick EXACTLY 3 extra items
     let dummies = allOthers.slice(0, 3);
     
-    // Start with correct items in step order, then randomly insert the 3 dummies
     let gridArray = [...currentOrderIngredients];
     dummies.forEach(dummy => {
       let insertPos = Math.floor(Math.random() * (gridArray.length + 1));
@@ -902,7 +946,6 @@
       
       document.getElementById('game-feedback').innerText = 'Incorrect! Check correct ingredients.';
 
-      // Highlight correct items so they can review
       Array.from(grid.children).forEach(b => {
          let ingName = b.dataset.ing;
          if (currentOrderIngredients.includes(ingName)) {
@@ -923,18 +966,26 @@
 
   function endGame() {
     clearInterval(blitzTimer);
-    document.getElementById('game-play').classList.add('hidden'); document.getElementById('game-over').classList.remove('hidden');
+    document.getElementById('game-play').classList.add('hidden'); 
+    document.getElementById('game-over').classList.remove('hidden');
     document.getElementById('final-score').innerText = gameScore;
     
-    let hs = parseInt(localStorage.getItem('hs_blitz')) || 0;
-    if(gameScore > hs) {
-      localStorage.setItem('hs_blitz', gameScore);
-      document.getElementById('high-score-display').innerText = 'High Score: ' + gameScore;
-      document.getElementById('final-score').innerText = gameScore + " (NEW HIGH SCORE!)";
+    if(gameScore > globalHighScore) {
+      setTimeout(() => {
+        let playerName = prompt("🔥 NEW KITCHEN RECORD! Enter your name to save your score:");
+        if(!playerName) playerName = "Mystery Chef";
+        
+        // Push the new high score to the cloud database
+        db.ref('leaderboard/blitz').set({
+          score: gameScore,
+          name: playerName
+        });
+        
+        document.getElementById('final-score').innerText = gameScore + " (NEW HIGH SCORE!)";
+      }, 500);
     }
   }
 
-  // --- MENU LOGIC ---
   function toggleGroup(groupId) { triggerHaptic(40); document.getElementById(groupId).classList.toggle('group-collapsed'); }
 
   function showMenu(category) {
