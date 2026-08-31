@@ -353,7 +353,7 @@
     </div>
     
     <div id="game-intro">
-      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear tickets. Select the ingredients for the order in any order, then click <strong>Serve Order</strong>. Correct orders give +5 seconds. Mistakes lose 25 points and -2 seconds. Go!</p>
+      <p style="color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; line-height: 1.5;">You have <strong>60 seconds</strong> to clear tickets. Select the correct ingredients for the order in any order, then click <strong>Serve Order</strong>. Correct orders give +5 seconds. Mistakes lose 25 points and -2 seconds. Go!</p>
       <button class="btn btn-train" onclick="startGame()">▶️ Start Rush</button>
     </div>
 
@@ -481,7 +481,7 @@
   function verifyAdminPin() {
     triggerHaptic(20);
     const input = document.getElementById('admin-pin').value;
-    if (input === 'Portaromana@1234') {
+    if (input === '1234@') {
       document.getElementById('admin-modal').classList.add('hidden');
       if (pendingAdminAction) pendingAdminAction();
     } else {
@@ -553,7 +553,7 @@
   function isItem86(itemObj) { return itemObj.ingredients && itemObj.ingredients.some(ing => outOfStock.includes(ing)); }
 
   // --- EDITABLE ROSTER DATABASE & PICKER ---
-  const staffList = ['Alice', 'David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
+  const staffList = ['David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
   
   const defaultRoster = {
     main: [
@@ -760,7 +760,7 @@
     });
   }
 
-  // --- PREP LINE BLITZ GAME LOGIC (FLEXIBLE SELECT + SERVE BUTTON) ---
+  // --- PREP LINE BLITZ GAME LOGIC ---
   let gameScore = 0;
   let gameTime = 60;
   let blitzTimer = null;
@@ -813,15 +813,39 @@
     
     document.getElementById('game-order-title').innerText = order.title;
     document.getElementById('ticket-num').innerText = Math.floor(Math.random() * 900) + 100;
-    currentOrderIngredients = order.ingredients;
     
-    // Pick 3 or 4 extra dummy items
-    let allOthers = allIngredients.filter(i => !currentOrderIngredients.includes(i));
+    // REMOVE BREAD FROM REQUIRED GAME ANSWERS
+    currentOrderIngredients = order.ingredients.filter(ing => ing !== 'Pala Bread');
+    
+    // SYNONYM FILTER (Prevents confusing duplicate-style dummies)
+    const synonymGroups = [
+      ['Tomato Sauce', 'Marinara Sauce'],
+      ['Burrata', 'Stracciatella']
+    ];
+    
+    let excludeDummies = [];
+    currentOrderIngredients.forEach(ing => {
+      synonymGroups.forEach(group => {
+        if (group.includes(ing)) {
+          excludeDummies = excludeDummies.concat(group);
+        }
+      });
+    });
+    
+    // Create pool of valid dummy items
+    let allOthers = allIngredients.filter(i => 
+      !currentOrderIngredients.includes(i) && 
+      !excludeDummies.includes(i) && 
+      i !== 'Pala Bread' &&
+      !i.toLowerCase().includes('dough') // Ensure baking doughs don't show up
+    );
+    
     allOthers = allOthers.sort(() => 0.5 - Math.random());
-    let numDummies = Math.floor(Math.random() * 2) + 3; // 3 or 4 dummies
-    let dummies = allOthers.slice(0, numDummies);
     
-    // Start with correct items in step order, then randomly insert 3-4 dummies
+    // Pick EXACTLY 3 extra items
+    let dummies = allOthers.slice(0, 3);
+    
+    // Start with correct items in step order, then randomly insert the 3 dummies
     let gridArray = [...currentOrderIngredients];
     dummies.forEach(dummy => {
       let insertPos = Math.floor(Math.random() * (gridArray.length + 1));
