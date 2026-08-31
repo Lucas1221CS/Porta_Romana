@@ -1,0 +1,8 @@
+{
+  "name": "Porta Romana Hub",
+  "short_name": "Porta Romana",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#d32f2f"
+}

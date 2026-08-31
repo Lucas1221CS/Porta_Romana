@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050505">
+<title>Porta Romana Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* PREMIUM HOSPITALITY DESIGN SYSTEM */
+  :root {
+    --bg-color: #050505;
+    --card-bg: rgba(20, 20, 22, 0.75);
+    --text-main: #f5f5f7;
+    --text-muted: #8a8a93;
+    --accent: #E63946; 
+    --accent-hover: #ff4d5a;
+    --accent-prep: #2A9D8F; 
+    --accent-bake: #E76F51; 
+    --accent-train: #7209B7; 
+    --accent-admin: #3A86FF; 
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --item-bg: rgba(255, 255, 255, 0.05);
+    --item-hover: rgba(255, 255, 255, 0.09);
+  }
+
+  body.light-mode {
+    --bg-color: #F8F9FA;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --text-main: #1d1d1f;
+    --text-muted: #6c757d;
+    --accent: #D90429;
+    --accent-prep: #208b7e;
+    --accent-bake: #d65a3b;
+    --accent-train: #560bad;
+    --accent-admin: #0077b6;
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --item-bg: rgba(0, 0, 0, 0.02);
+    --item-hover: rgba(0, 0, 0, 0.05);
+  }
+
+  body { 
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+    background-color: var(--bg-color);
+    background-image: radial-gradient(circle at top right, rgba(230, 57, 70, 0.08), transparent 50%),
+                      radial-gradient(circle at bottom left, rgba(42, 157, 143, 0.08), transparent 50%);
+    background-attachment: fixed;
+    color: var(--text-main); 
+    padding: 20px; margin: 0; min-height: 100vh;
+    display: flex; justify-content: center; align-items: flex-start;
+    transition: background-color 0.4s ease;
+    padding-top: 60px;
+  }
+  
+  /* --- DYNAMIC ISLAND GLOBAL TIMER --- */
+  #dynamic-island {
+    position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+    background: var(--card-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border); border-radius: 24px;
+    padding: 12px 20px; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; gap: 10px; min-width: 220px;
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .island-item { display: flex; justify-content: space-between; align-items: center; color: var(--text-main); font-weight: 600; font-size: 0.9em; }
+  .island-title { max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .island-time { color: var(--accent-bake); font-variant-numeric: tabular-nums; margin-left: auto; margin-right: 12px; }
+  .island-time.done { color: var(--accent-prep); animation: pulse 1s infinite; }
+  .island-close { background: var(--item-bg); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 1px solid var(--glass-border); color: var(--text-muted); }
+  .island-close:active { transform: scale(0.9); }
+
+  .card { background: var(--card-bg); padding: 30px 24px; border-radius: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid var(--glass-border); width: 100%; max-width: 550px; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+  
+  .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  h1 { margin: 0; font-weight: 800; font-size: 1.8em; letter-spacing: -0.5px; }
+  .theme-btn { background: var(--item-bg); border: 1px solid var(--glass-border); border-radius: 50%; width: 44px; height: 44px; font-size: 1.2em; cursor: pointer; color: var(--text-main); display: flex; justify-content: center; align-items: center; transition: all 0.3s; }
+  .theme-btn:hover { background: var(--item-hover); transform: scale(1.05); }
+  
+  h2 { font-weight: 700; font-size: 1.2em; letter-spacing: 0.5px; margin-bottom: 16px; text-transform: uppercase; color: var(--text-muted);} 
+  h3 { color: var(--text-muted); font-size: 0.85em; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-top: 25px; margin-bottom: 12px; padding-left: 5px;}
+  ul { list-style-type: none; padding: 0; margin: 0; }
+  
+  /* --- NEW PREMIUM HOME GRID --- */
+  .home-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px;}
+  .home-card { background: var(--item-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 18px; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .home-card:hover { transform: translateY(-3px); background: var(--item-hover); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+  .home-card:active { transform: scale(0.97); }
+  .card-icon { width: 54px; height: 54px; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 1.6em; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(255,255,255,0.2); }
+  .icon-prep { background: linear-gradient(135deg, var(--accent-prep), #1b685e); }
+  .icon-bake { background: linear-gradient(135deg, var(--accent-bake), #b34a36); }
+  .icon-train { background: linear-gradient(135deg, var(--accent-train), #4a067a); }
+  .icon-admin { background: linear-gradient(135deg, var(--accent-admin), #1d4e9c); }
+  .icon-roster { background: linear-gradient(135deg, #FFB703, #FB8500); }
+  
+  .card-content h3 { margin: 0 0 4px 0; color: var(--text-main); font-size: 1.1em; letter-spacing: -0.2px; text-transform: none;}
+  .card-content p { margin: 0; color: var(--text-muted); font-size: 0.85em; font-weight: 500;}
+
+  /* --- ADMIN MODAL --- */
+  #admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 20000; display: flex; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.3s ease;}
+  #admin-modal.hidden { opacity: 0; pointer-events: none; }
+  .modal-card { background: var(--card-bg); padding: 30px; border-radius: 24px; text-align: center; width: 90%; max-width: 340px; border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  .pin-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--item-bg); color: var(--text-main); font-size: 1.2em; text-align: center; margin-bottom: 20px; outline: none; transition: 0.3s; box-sizing: border-box;}
+  .pin-input:focus { border-color: var(--accent-admin); background: rgba(255,255,255,0.05); }
+
+  /* --- SCHEDULE & DUTIES --- */
+  .segmented-control { display: flex; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--glass-border);}
+  .light-mode .segmented-control { background: rgba(0,0,0,0.05); }
+  .seg-btn { flex: 1; border: none; background: transparent; color: var(--text-muted); padding: 10px; font-size: 0.9em; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+  .seg-btn.active { background: var(--item-bg); color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid var(--glass-border);}
+  
+  .table-wrapper { overflow-x: auto; background: var(--item-bg); border-radius: 16px; border: 1px solid var(--glass-border); padding: 1px; margin-bottom: 20px; }
+  .roster-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+  .roster-table th, .roster-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--glass-border); white-space: nowrap;}
+  .roster-table th { background: rgba(0,0,0,0.2); font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.8em; letter-spacing: 1px; }
+  .roster-table tr:last-child td { border-bottom: none; }
+  .roster-table td { color: var(--text-main); text-transform: capitalize; transition: all 0.3s ease;}
+  td.highlight-cell { background-color: rgba(58, 134, 255, 0.25); color: #fff; font-weight: 700; border: 1px solid var(--accent-admin); box-shadow: inset 0 0 10px rgba(58, 134, 255, 0.2);}
+  .warning-banner { background: rgba(230, 57, 70, 0.15); border: 1px solid var(--accent); color: #ff6b6b; padding: 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600; margin-bottom: 15px; text-align: center; line-height: 1.4;}
+
+  .edit-input { width: 100px; padding: 8px; border-radius: 8px; border: 1px solid var(--accent-admin); background: var(--bg-color); color: var(--text-main); font-family: inherit; }
+
+  /* --- EXISTING STYLES --- */
+  .search-bar { width: 100%; padding: 16px 20px; border-radius: 20px; border: 1px solid var(--glass-border); background: var(--item-bg); color: var(--text-main); margin-bottom: 20px; font-size: 16px; box-sizing: border-box; outline: none; transition: all 0.3s ease; }
+  .search-bar:focus { border-color: var(--accent); background: var(--card-bg); box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.15); }
+  .search-bar::placeholder { color: var(--text-muted); }
+
+  .req-item { padding: 14px 18px; background: var(--item-bg); margin-bottom: 8px; border-radius: 16px; font-size: 1em; font-weight: 500; display: flex; align-items: center; gap: 14px; cursor: pointer; border: 1px solid var(--glass-border); transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); justify-content: space-between; }
+  .req-item:hover { transform: scale(1.01); background: var(--item-hover); }
+  .req-checkbox { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--text-muted); display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: all 0.2s ease; flex-shrink: 0; }
+  .req-item.checked .req-checkbox { background: var(--accent-prep); border-color: var(--accent-prep); color: white; }
+  .req-item.checked { opacity: 0.5; text-decoration: line-through; }
+  .req-text-wrap { display: flex; align-items: center; gap: 14px;}
+
+  .step-item { padding: 18px; margin-bottom: 12px; border-radius: 16px; cursor: pointer; font-size: 1.05em; font-weight: 600; background: var(--item-bg); border: 1px solid var(--glass-border); transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; align-items: center; gap: 12px; }
+  .step-item:hover { background: var(--item-hover); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+  .step-icon { font-size: 1.2em; flex-shrink: 0; }
+  .step-text { flex: 1; }
+  .completed-step { background: transparent !important; border: 1px solid var(--glass-border) !important; text-decoration: line-through; color: var(--text-muted) !important; opacity: 0.5; box-shadow: none !important; transform: none !important; }
+
+  .timer-pill { background: var(--glass-border); border: 1px solid var(--text-muted); border-radius: 14px; padding: 6px 12px; font-size: 0.85em; font-weight: 700; display: flex; align-items: center; gap: 4px; transition: all 0.3s ease; color: var(--text-main); flex-shrink: 0; font-variant-numeric: tabular-nums;}
+  .timer-pill.running { background: rgba(231, 111, 81, 0.15); color: var(--accent-bake); border-color: var(--accent-bake); box-shadow: 0 0 12px rgba(231, 111, 81, 0.3); }
+  .timer-pill.done { background: rgba(42, 157, 143, 0.15); color: var(--accent-prep); border-color: var(--accent-prep); animation: successPulse 1.5s infinite; }
+  @keyframes successPulse { 0% { box-shadow: 0 0 0 0 rgba(42, 157, 143, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(42, 157, 143, 0); } 100% { box-shadow: 0 0 0 0 rgba(42, 157, 143, 0); } }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+  .btn { color: white; border: none; padding: 18px; border-radius: 18px; cursor: pointer; width: 100%; font-size: 1.05em; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .btn-primary { background: var(--accent); } .btn-primary:hover { box-shadow: 0 8px 20px rgba(230, 57, 70, 0.3); }
+  .btn-admin { background: var(--accent-admin); } .btn-admin:hover { box-shadow: 0 8px 20px rgba(58, 134, 255, 0.3); }
+  .btn-secondary { background: var(--item-bg); color: var(--text-main); border: 1px solid var(--glass-border); margin-top: 20px;}
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid transparent; padding: 12px; margin-top: 5px; } .btn-ghost:hover { border-color: var(--glass-border); }
+  
+  .menu-btn-item { background: transparent; color: var(--text-main); margin-bottom: 0; padding: 16px 20px; font-weight: 500; justify-content: flex-start; border-radius: 0; border-bottom: 1px solid var(--glass-border); }
+  .menu-btn-item:last-child { border-bottom: none; }
+  .menu-btn-item:hover { background: var(--item-hover); transform: none; box-shadow: none;}
+  .menu-btn-item.disabled-item { opacity: 0.4; pointer-events: none; text-decoration: line-through; }
+  
+  .menu-group { margin-bottom: 16px; background: var(--item-bg); border-radius: 20px; border: 1px solid var(--glass-border); overflow: hidden; }
+  .menu-group-header { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 1.1em; font-weight: 700; background: rgba(0,0,0,0.2); }
+  .premium-chevron { width: 10px; height: 10px; border-right: 2.5px solid var(--text-muted); border-bottom: 2.5px solid var(--text-muted); transform: rotate(45deg); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); border-radius: 1px; margin-right: 6px; }
+  .group-collapsed .premium-chevron { transform: rotate(-45deg); }
+  .menu-group-content { display: flex; flex-direction: column; max-height: 2500px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .group-collapsed .menu-group-content { max-height: 0; }
+  
+  #flashcard-container { background: var(--item-bg); border: 1px solid var(--glass-border); border-radius: 20px; text-align: center; padding: 40px 20px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+  #flashcard-container:active { transform: scale(0.98); }
+  #flashcard-title { margin-bottom: 15px; color: var(--accent); font-size: 1.6em; }
+  #flashcard-answer-list li { padding: 10px 0; border-bottom: 1px solid var(--glass-border); font-size: 1.1em; font-weight: 500;}
+  #flashcard-answer-list li:last-child { border-bottom: none; }
+
+  .toggle-switch { width: 44px; height: 24px; background: var(--glass-border); border-radius: 12px; position: relative; cursor: pointer; transition: 0.3s; flex-shrink: 0; border: 1px solid var(--glass-border);}
+  .toggle-switch.active { background: var(--accent); border-color: var(--accent); }
+  .toggle-knob { width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 1px; left: 2px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+  .toggle-switch.active .toggle-knob { left: 20px; }
+  .inventory-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--glass-border); font-weight: 500; }
+  .inventory-row:last-child { border-bottom: none; }
+  .inventory-row.is-86 { color: var(--text-muted); text-decoration: line-through; }
+
+  .hidden { display: none !important; opacity: 0; pointer-events: none;}
+  .fade-in { animation: smoothFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+  @keyframes smoothFade { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  .calc-input { width: 100%; padding: 16px; margin: 8px 0 15px 0; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--item-bg); color: var(--text-main); font-size: 16px; box-sizing: border-box;}
+  .calc-input:focus { border-color: var(--accent); outline: none; }
+  .calc-result { font-size: 1.2em; font-weight: 800; color: var(--accent); margin-top: 5px;}
+  .ingredient-item.calc-static { background: transparent; border-bottom: 1px solid var(--glass-border); border-radius: 0; padding: 16px 5px;}
+</style>
+</head>
+<body>
+
+<!-- ADMIN PASSWORD MODAL -->
+<div id="admin-modal" class="hidden">
+  <div class="modal-card">
+    <h2 style="color: var(--text-main); margin-bottom: 20px;">Admin Access</h2>
+    <input type="password" id="admin-pin" class="pin-input" placeholder="Enter Password">
+    <button class="btn btn-admin" onclick="verifyAdminPin()">Unlock</button>
+    <button class="btn btn-ghost" onclick="closeAdminModal()">Cancel</button>
+  </div>
+</div>
+
+<div id="dynamic-island" class="hidden">
+  <!-- Active timers injected here -->
+</div>
+
+<div class="card" id="app-container">
+  <div class="header-container">
+    <h1 style="color: var(--accent);">Porta Romana</h1>
+    <button class="theme-btn" onclick="toggleThemeManual()">🌓</button>
+  </div>
+  
+  <div id="home-screen" class="fade-in">
+    <h2>Operations</h2>
+    <div class="home-grid">
+      <div class="home-card" onclick="showMenu('preparing')">
+        <div class="card-icon icon-prep">🔪</div>
+        <div class="card-content">
+          <h3>Prep & Assembly</h3>
+          <p>Pizzas, Paninis & Pala Ingredients</p>
+        </div>
+      </div>
+      
+      <div class="home-card" onclick="showMenu('baking')">
+        <div class="card-icon icon-bake">🔥</div>
+        <div class="card-content">
+          <h3>Baking & Dough</h3>
+          <p>Biga Calculators & Oven Timers</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>Management</h2>
+    <div class="home-grid">
+      <div class="home-card" onclick="showRosterMenu()">
+        <div class="card-icon icon-roster">🗓️</div>
+        <div class="card-content">
+          <h3>Staff Roster & Duties</h3>
+          <p>Weekly Shifts & Cleaning Jobs</p>
+        </div>
+      </div>
+
+      <div class="home-card" onclick="showFlashcards()">
+        <div class="card-icon icon-train">🧠</div>
+        <div class="card-content">
+          <h3>Trainee Mode</h3>
+          <p>Interactive Line Memorization</p>
+        </div>
+      </div>
+      
+      <!-- REQUIRES ADMIN PIN -->
+      <div class="home-card" onclick="requestAdminAccess(showInventoryMenu)">
+        <div class="card-icon icon-admin">🛑</div>
+        <div class="card-content">
+          <h3>86 Manager (Locked)</h3>
+          <p>Live Inventory & Stock Toggles</p>
+        </div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <span style="font-size: 11px; color: var(--text-muted); opacity: 0.5; font-weight: 500; letter-spacing: 0.5px;">Porta Romana OS v1.0 • Built by Lucas</span>
+    </div>
+  </div>
+
+  <!-- --- ROSTER & CLEANING SCREEN --- -->
+  <div id="roster-screen" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="color: var(--text-main); margin: 0;">Roster & Duties</h2>
+      <button id="edit-roster-btn" class="btn btn-admin" style="width: auto; padding: 10px 15px; margin: 0; font-size: 0.85em;" onclick="requestAdminAccess(enableRosterEdit)">⚙️ Edit</button>
+      <button id="save-roster-btn" class="btn btn-prep hidden" style="width: auto; padding: 10px 15px; margin: 0; font-size: 0.85em;" onclick="saveRoster()">💾 Save</button>
+    </div>
+    
+    <input type="text" id="roster-search" class="search-bar" onkeyup="highlightName()" placeholder="Search your name (e.g. Lucas)...">
+    
+    <div class="segmented-control">
+      <button class="seg-btn active" id="tab-main" onclick="showRosterTab('main')">Main Branch</button>
+      <button class="seg-btn" id="tab-thonglor" onclick="showRosterTab('thonglor')">Thonglor</button>
+      <button class="seg-btn" id="tab-cleaning" onclick="showRosterTab('cleaning')">Cleaning</button>
+    </div>
+
+    <div id="roster-main" class="table-wrapper fade-in">
+      <table class="roster-table">
+        <thead>
+          <tr><th>Day</th><th>7am-5pm</th><th>9am-7pm</th><th>3pm-1am</th><th>7pm-5am</th><th>Off Day</th></tr>
+        </thead>
+        <tbody id="tbody-main"></tbody>
+      </table>
+    </div>
+
+    <div id="roster-thonglor" class="table-wrapper hidden">
+      <table class="roster-table">
+        <thead>
+          <tr><th>Day</th><th>9am-7pm</th><th>4pm-2am</th><th>7pm-5am</th><th>5pm-3am</th></tr>
+        </thead>
+        <tbody id="tbody-thonglor"></tbody>
+      </table>
+    </div>
+
+    <div id="roster-cleaning" class="table-wrapper hidden">
+      <div class="warning-banner">⚠️ IMPORTANT: Valid for BOTH branches. ALL STAFF must send a photo to the LINE group after completing these jobs.</div>
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th>Days</th><th>Toilette</th>
+            <th>Fridge & Slicer <br><span style="font-size:0.7em; text-transform:none; font-weight:400; opacity:0.8;">Inside/out, floor, blade</span></th>
+            <th>Sink & Dishes <br><span style="font-size:0.7em; text-transform:none; font-weight:400; opacity:0.8;">Clean room, organize</span></th>
+            <th>Tables & Garden <br><span style="font-size:0.7em; text-transform:none; font-weight:400; opacity:0.8;">Floor, ashtray</span></th>
+            <th>Cafe Station <br><span style="font-size:0.7em; text-transform:none; font-weight:400; opacity:0.8;">Machine, coffee cups</span></th>
+            <th>Boxes & Tools <br><span style="font-size:0.7em; text-transform:none; font-weight:400; opacity:0.8;">Check prep, knives, shop</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody-cleaning"></tbody>
+      </table>
+    </div>
+
+    <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
+  </div>
+  
+  <div id="menu-screen" class="hidden">
+    <h2 id="menu-title" style="color: var(--text-main); margin-bottom: 20px;">Menu</h2>
+    <input type="text" id="menu-search" class="search-bar" onkeyup="filterList('menu-search', 'menu-btn-searchable')" placeholder="Search recipes...">
+    <div id="menu-buttons"></div>
+    <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
+  </div>
+
+  <div id="inventory-screen" class="hidden">
+    <h2 style="color: var(--text-main); margin-bottom: 5px;">86 Manager</h2>
+    <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px;">Toggle out-of-stock items. Affected recipes will be disabled globally.</p>
+    <input type="text" id="inv-search" class="search-bar" onkeyup="filterList('inv-search', 'inventory-row')" placeholder="Search ingredients...">
+    <div class="menu-group" id="inventory-list-container">
+      <div class="menu-group-content" id="inventory-list" style="max-height: none;"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
+  </div>
+
+  <div id="flashcard-screen" class="hidden">
+    <h2 style="color: var(--text-main); margin-bottom: 5px;">Flashcards</h2>
+    <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px;">Test your memory on the prep line.</p>
+    <div id="flashcard-container" onclick="flipCard()">
+      <h1 id="flashcard-title">Item Name</h1>
+      <p id="flashcard-prompt" style="color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px;">Tap to reveal ingredients</p>
+      <div id="flashcard-answer" class="hidden" style="margin-top: 25px; text-align: left;">
+        <ul id="flashcard-answer-list"></ul>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="nextFlashcard()" style="margin-top: 20px;">Next Recipe</button>
+    <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
+  </div>
+  
+  <div id="training-module" class="hidden">
+    <h2 id="module-title" style="color: var(--text-main); margin-bottom: 20px; font-size: 1.6em;"></h2>
+    <div id="standard-content">
+      <h3 id="list-title-1">Requirements</h3>
+      <ul id="ingredient-list"></ul>
+      <h3 id="list-title-2">Steps</h3>
+      <ul id="step-list"></ul>
+    </div>
+    <div id="calc-content" class="hidden">
+      <h3>Dough Requirements</h3>
+      <label style="color: var(--text-muted); font-size: 0.9em; padding-left: 5px;">Number of Doughballs:</label>
+      <input type="number" id="calc-qty" class="calc-input" value="50" oninput="runCalculator()">
+      <label style="color: var(--text-muted); font-size: 0.9em; padding-left: 5px;">Weight per ball (grams):</label>
+      <input type="number" id="calc-weight" class="calc-input" value="260" oninput="runCalculator()">
+      
+      <h3>100% Biga Preferment (30%)</h3>
+      <ul>
+        <li class="ingredient-item calc-static">High-W Flour: <span id="res-biga-flour" class="calc-result">0</span> g</li>
+        <li class="ingredient-item calc-static">Water: <span id="res-biga-water" class="calc-result">0</span> g</li>
+        <li class="ingredient-item calc-static">Fresh Yeast: <span id="res-biga-yeast" class="calc-result">0</span> g</li>
+      </ul>
+      
+      <h3>Final Dough Mix (70% Hydration)</h3>
+      <ul>
+        <li class="ingredient-item calc-static">Remaining Flour: <span id="res-final-flour" class="calc-result">0</span> g</li>
+        <li class="ingredient-item calc-static">Remaining Water: <span id="res-final-water" class="calc-result">0</span> g</li>
+        <li class="ingredient-item calc-static">Salt (3%): <span id="res-final-salt" class="calc-result">0</span> g</li>
+      </ul>
+    </div>
+    <button class="btn btn-secondary" onclick="goBackToMenu()">Back</button>
+  </div>
+</div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(() => { console.log('SW Registered'); });
+  }
+
+  function initTheme() {
+    let savedTheme = localStorage.getItem('theme');
+    let currentHour = new Date().getHours();
+    let isEvening = currentHour >= 18 || currentHour < 6; 
+    if (savedTheme === 'light') document.body.classList.add('light-mode');
+    else if (savedTheme === 'dark') document.body.classList.remove('light-mode');
+    else {
+      if (!isEvening) document.body.classList.add('light-mode');
+      else document.body.classList.remove('light-mode');
+    }
+  }
+  initTheme();
+
+  function toggleThemeManual() {
+    triggerHaptic(30); document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+  }
+
+  function playAlarmSound() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+    function createBeep(time) {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square'; osc.frequency.setValueAtTime(880, time);
+      gain.gain.setValueAtTime(0.1, time); gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+      osc.start(time); osc.stop(time + 0.25);
+    }
+    createBeep(now); createBeep(now + 0.3); createBeep(now + 0.6);
+  }
+
+  let wakeLock = null;
+  async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
+  function releaseWakeLock() { if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); } }
+  document.addEventListener('visibilitychange', () => { if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock(); });
+  function triggerHaptic(ms = 40) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+  // --- ADMIN SECURITY SYSTEM ---
+  let pendingAdminAction = null;
+  
+  function requestAdminAccess(actionFunction) {
+    triggerHaptic(30);
+    pendingAdminAction = actionFunction;
+    const modal = document.getElementById('admin-modal');
+    const input = document.getElementById('admin-pin');
+    modal.classList.remove('hidden');
+    input.value = '';
+    setTimeout(() => input.focus(), 100);
+  }
+
+  function verifyAdminPin() {
+    triggerHaptic(20);
+    const input = document.getElementById('admin-pin').value;
+    if (input === 'Portaromana@manage') {
+      document.getElementById('admin-modal').classList.add('hidden');
+      if (pendingAdminAction) pendingAdminAction();
+    } else {
+      alert('Incorrect Admin Password');
+      document.getElementById('admin-pin').value = '';
+    }
+  }
+
+  function closeAdminModal() {
+    triggerHaptic(20);
+    document.getElementById('admin-modal').classList.add('hidden');
+    pendingAdminAction = null;
+  }
+
+  // --- RECIPE DATA ---
+  const preparingData = {
+    'prep_p1': { title: '1. ILDE', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Gorgonzola Cheese', 'Onions', 'Salami'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put gorgonzola cheese.', 'Put onions.', 'Put salami.', 'Bake for 4 minutes.'] },
+    'prep_p2': { title: '2. Margherita', type: 'pizza', ingredients: ['San Marzano DOP Peeled Tomatoes', 'Mozzarella Cheese'], steps: ['Put San Marzano tomatoes.', 'Put mozzarella cheese.', 'Bake for 4 minutes.'] },
+    'prep_p3': { title: '3. PARMA', type: 'pizza', ingredients: ['Tomato Sauce', 'Tomato Confit', 'Stracciatella Cheese', 'Parma Ham'], steps: ['Put tomato sauce.', 'Put tomato confit.', 'Bake for 4 minutes.', 'AFTER BAKING: Put Parma ham.', 'AFTER BAKING: Put stracciatella cheese.'] },
+    'prep_p4': { title: '4. SIMPLY COTTO', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Cooked Ham'], steps: ['Put tomato sauce.', 'Put mozzarella cheese.', 'Put cooked ham.', 'Bake for 4 minutes.'] },
+    'prep_p5': { title: '5. GUANCIALE', type: 'pizza', ingredients: ['Tomato Sauce', 'Crispy Guanciale', 'Grana Padano Cheese'], steps: ['Put tomato sauce.', 'Put crispy guanciale.', 'Bake for 4 minutes.', 'AFTER BAKING: Put Grana Padano cheese.'] },
+    'prep_p6': { title: '6. VEGETARIAN', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Pesto genovese', 'Tomato Confit'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put six spots of pesto genovese.', 'Put tomato confit on top of the pesto sauce.', 'Bake for 4 minutes.'] },
+    'prep_p7': { title: '7. 4 CHEESE', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Gorgonzola', 'Parmesan', 'Brie'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put gorgonzola.', 'Put parmesan.', 'Put brie.', 'Bake for 4 minutes.'] },
+    'prep_p8': { title: '8. NAPOLI', type: 'pizza', ingredients: ['Tomato Sauce', 'Fresh Italian Mozzarella', 'Cantabrian Sea Anchovies'], steps: ['Put tomato sauce.', 'Put fresh mozzarella.', 'Put anchovies.', 'Bake for 4 minutes.'] },
+    'prep_p9': { title: '9. VEGAN PIZZA', type: 'pizza', ingredients: ['Tomato Sauce', 'Red Onions', 'Italian Capers', 'Olives', 'Confit Tomatoes'], steps: ['Put tomato sauce.', 'Put red onions, capers, and olives.', 'Put confit tomatoes.', 'Bake for 4 minutes.'] },
+    'prep_p10': { title: '10. MARINARA', type: 'pizza', ingredients: ['Tomato Sauce', 'Garlic'], steps: ['Put tomato sauce.', 'Put garlic.', 'Bake for 4 minutes.'] },
+    'prep_p11': { title: '11. ITALIAN MEATBALLS', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Spicy homemade sauce', 'Italian-Style Meatballs', 'Parmesan Cheese'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put spicy sauce.', 'Put meatballs.', 'Bake for 4 minutes.', 'AFTER BAKING: Put parmesan.'] },
+    'prep_p12': { title: '12. PIZZA OLIVE', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Olives'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put olives.', 'Bake for 4 minutes.'] },
+    'prep_p13': { title: '13. PIZZA TUNA AND ONIONS', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Tuna', 'Red Onions'], steps: ['Mix tuna, red onions, oregano, and oil in a separate bowl.', 'Put tomato sauce.', 'Put mozzarella.', 'Put the tuna mixture on top.', 'Bake for 4 minutes.'] },
+    'prep_p14': { title: '14. STRACCIATELLA & ANCHOVIES', type: 'pizza', ingredients: ['Tomato Sauce', 'Anchovies', 'Stracciatella'], steps: ['Put tomato sauce.', 'Put anchovies.', 'Bake for 4 minutes.', 'AFTER BAKING: Put stracciatella.'] },
+    'prep_p15': { title: '15. SPICY HAWAIIAN', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Pineapple', 'Red Onions', 'Chili'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put pineapple, onions, and chili.', 'Bake for 4 minutes.'] },
+    'prep_p16': { title: '16. SUPER PORK', type: 'pizza', ingredients: ['Tomato Sauce', 'Mozzarella', 'Italian Sausage', 'Grilled Bell-Peppers', 'Crispy Guanciale'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put Italian sausage and grilled bell-peppers.', 'Put guanciale.', 'Bake for 4 minutes.'] },
+    'prep_p17': { title: '17. PEPPER SMOKED PIZZA', type: 'pizza', ingredients: ['Smoked Provola Cheese', 'Vesuvius Tomatoes', 'Thai Black Pepper'], steps: ['Put smoked provola cheese.', 'Put Vesuvius tomatoes.', 'Put Thai black pepper.', 'Bake for 4 minutes.'] },
+    'prep_p18': { title: '18. MARINARA EVOLUTION', type: 'pizza', ingredients: ['Marinara Sauce', 'Anchovies', 'Confit Cherry Tomatoes', 'Capers', 'Garlic'], steps: ['Put marinara sauce.', 'Put anchovies.', 'Put confit tomatoes.', 'Put capers and garlic.', 'Bake for 4 minutes.'] },
+    'prep_p19': { title: '19. TASTYGARDEN', type: 'pizza', ingredients: ['Italian Baked Potatoes', 'Rosemary', 'Garlic', 'Grilled Peppers', 'Smoked Provola'], steps: ['Put smoked provola.', 'Put baked potatoes and grilled peppers.', 'Put rosemary and garlic.', 'Bake for 4 minutes.'] },
+    'prep_p20': { title: '20. SAUSAGE AND BURRATA', type: 'pizza', ingredients: ['Tomato Sauce', 'Sausage', 'Burrata'], steps: ['Put tomato sauce.', 'Put sausage.', 'Bake for 4 minutes.', 'AFTER BAKING: Put fresh burrata.'] },
+    'prep_p21': { title: '21. SPICY CHICKEN PIZZA', type: 'pizza', ingredients: ['Tomato Sauce', 'Italian Mozzarella', 'Tomatoes', 'Baked Chicken', 'Homemade Spicy Sauce'], steps: ['Put tomato sauce.', 'Put mozzarella.', 'Put tomatoes.', 'Put chicken.', 'Bake for 4 minutes.', 'AFTER BAKING: Put spicy sauce.'] },
+    'prep_p22': { title: '22. CALZONE HAM AND CHEESE', type: 'pizza', ingredients: ['Tomato Sauce', 'Cooked Ham', 'Mozzarella', 'Parmesan Cheese'], steps: ['Fold dough.', 'Put tomato sauce inside.', 'Put cooked ham and mozzarella inside.', 'Top with parmesan.', 'Bake for 4 minutes.'] },
+    'prep_pa1': { title: '1. PARIGINA', type: 'panini', ingredients: ['Pala Bread', 'Cooked Ham', 'Mozzarella', 'Tomato Sauce'], steps: ['Slice Pala bread.', 'Add tomato sauce.', 'Add cooked ham and mozzarella.', 'Toast or bake as required.'] },
+    'prep_pa2': { title: '2. ITALIAN SAUSAGE', type: 'panini', ingredients: ['Pala Bread', 'Italian Sausage', 'Oven-Stewed Onions', 'Spicy Homemade Sauce'], steps: ['Slice Pala bread.', 'Add Italian sausage and stewed onions.', 'Add spicy homemade sauce.', 'Toast or bake as required.'] },
+    'prep_pa3': { title: '3. MORTADELLA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Italian Mortadella', 'Fresh Mozzarella Cheese'], steps: ['Slice Pala bread.', 'Add fresh mozzarella.', 'Layer Italian mortadella generously.', 'Toast or bake as required.'] },
+    'prep_pa4': { title: '4. SPICY TUNA', type: 'panini', ingredients: ['Pala Bread', 'Tuna', 'Confit Tomatoes', 'Mayo', 'Red Onions', 'Homemade Spicy Sauce'], steps: ['Slice Pala bread.', 'Mix tuna with mayo, onions, and spicy sauce.', 'Add confit tomatoes.', 'Toast or bake as required.'] },
+    'prep_pa5': { title: '5. COPPA & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Cured Pork Collar (Coppa)', 'French Brie Cheese'], steps: ['Slice Pala bread.', 'Add slices of French Brie.', 'Layer cured pork collar (Coppa).', 'Toast or bake as required.'] },
+    'prep_pa6': { title: '6. PEPERRONI SPICY', type: 'panini', ingredients: ['Pala Bread', 'Italian Salami', 'Spicy Pepper Garlic Sauce', 'Mozzarella', 'Gorgonzola Cheese'], steps: ['Slice Pala bread.', 'Spread spicy pepper garlic sauce.', 'Add mozzarella and gorgonzola.', 'Layer Italian salami.', 'Toast or bake as required.'] },
+    'prep_pa7': { title: '7. TARTUFINO', type: 'panini', ingredients: ['Pala Bread', 'Cooked Ham', 'Italian Brie', 'Truffle Mayo'], steps: ['Slice Pala bread.', 'Spread truffle mayo evenly.', 'Add Italian Brie and cooked ham.', 'Toast or bake as required.'] },
+    'prep_pa8': { title: '8. HAM & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Italian Cooked Ham', 'Mozzarella'], steps: ['Slice Pala bread.', 'Add mozzarella cheese.', 'Layer Italian cooked ham.', 'Toast or bake as required.'] },
+    'prep_pa9': { title: '9. PARMA HAM & CHEESE', type: 'panini', ingredients: ['Pala Bread', 'Italian Parma Ham', 'Mozzarella'], steps: ['Slice Pala bread.', 'Add mozzarella cheese.', 'Layer Italian Parma ham.', 'Toast or bake as required.'] },
+    'prep_pa10': { title: '10. CHICKEN SANDWICH', type: 'panini', ingredients: ['Pala Bread', 'Chicken Grill', 'Mozzarella', 'Spicy Homemade Sauce', 'Mayonnaise'], steps: ['Slice Pala bread.', 'Mix mayo and spicy homemade sauce.', 'Add mozzarella and grilled chicken.', 'Toast or bake as required.'] },
+    'prep_pa11': { title: '11. BURRATA & PARMA HAM', type: 'panini', ingredients: ['Pala Bread', 'Fresh Burrata Cheese', 'Premium Parma Ham'], steps: ['Slice Pala bread.', 'Add premium Parma ham.', 'Top with fresh burrata cheese.', 'Toast or bake as required.'] },
+    'prep_pa12': { title: '12. BUTTER & ANCHOVIES', type: 'panini', ingredients: ['Pala Bread', 'Butter', 'Anchovies', 'Fresh Lemon Zest', 'Mozzarella Cheese'], steps: ['Slice Pala bread.', 'Spread butter and add mozzarella.', 'Layer anchovies and garnish with lemon zest.', 'Toast or bake as required.'] }
+  };
+
+  const bakingData = {
+    'bake_focaccia': { title: 'Focaccia', type: 'recipe', ingredients: ['Focaccia Dough', 'Semolina', 'Olive Oil', 'Water'], steps: ['Preheat the oven to 230°C Top / 240°C Bottom.', 'Take the focaccia dough out of the fridge and wait for it to reach exactly 25°C.', 'Dust the prep surface with semolina.', 'Stretch the dough gently to fit the baking tray without degassing it.', 'Grease the baking tray evenly with olive oil.', 'Place the dough in the tray, press with fingers to create dimples.', 'Emulsify olive oil and water, and pour evenly over the top.', 'Bake for 11 mins until golden brown.'] },
+    'bake_sfilatino': { title: 'Sfilatino', type: 'recipe', ingredients: ['Sfilatino Dough', 'Semolina', 'Olive Oil', 'Cutting Blade'], steps: ['Preheat the oven to 210°C Top / 220°C Bottom.', 'Dust the prep surface with semolina.', 'Fold the dough carefully and crack the surface using the semolina.', 'Use the cutting blade to score the top properly.', 'Bake for 12 mins.'] },
+    'bake_brioche_group': { title: 'Brioche & Pangoccioli (All)', type: 'recipe', ingredients: ['Dough (Brioche/Pangoccioli)', 'Filling', 'Baking Paper'], steps: ['Preheat the oven to 200°C Top / 200°C Bottom.', 'Line the baking trays carefully with baking paper.', 'Portion and shape the dough.', 'Add the designated filling if required for the specific item.', 'Allow the dough to proof at room temperature and wait 30-40 mins.', 'Bake for 10 mins until perfectly golden.'] },
+    'calc_biga': { title: 'Neapolitan Biga Calculator', type: 'calc' }
+  };
+
+  // --- AUTOMATIC INVENTORY GENERATION ---
+  let outOfStock = JSON.parse(localStorage.getItem('86_list')) || [];
+  let allIngredients = [];
+  Object.values(preparingData).forEach(d => { if(d.ingredients) allIngredients.push(...d.ingredients); });
+  Object.values(bakingData).forEach(d => { if(d.ingredients) allIngredients.push(...d.ingredients); });
+  allIngredients = [...new Set(allIngredients)].sort();
+
+  function isItem86(itemObj) { return itemObj.ingredients && itemObj.ingredients.some(ing => outOfStock.includes(ing)); }
+
+  // --- EDITABLE ROSTER DATABASE ---
+  const defaultRoster = {
+    main: [
+      ['Monday', 'Jerry', 'Willow', 'Min', 'Zar, Lucas', 'Lyn, Seint'],
+      ['Tuesday', 'Lyn', 'Willow', 'Min', 'Zar, Lucas', 'David, Jerry'],
+      ['Wednesday', 'Jerry', 'Lyn', 'Alice', 'Zar, Lucas', 'Min'],
+      ['Thursday', 'Jerry', 'Lyn', 'Min', 'Zar, Lucas', 'Alice, Willow'],
+      ['Friday', 'Jerry', 'Willow', 'Alice', 'Lucas, Lyn', 'Zar'],
+      ['Saturday', 'Jerry', 'Willow', 'Alice', 'Zar, Lyn', 'Luis'],
+      ['Sunday', 'Jerry', 'Willow', 'Alice', 'Zar, Lyn', 'Lucas']
+    ],
+    thonglor: [
+      ['Monday', 'David', 'Alice', 'Luis', '-'],
+      ['Tuesday', 'Seint', 'Alice', 'Luis', '-'],
+      ['Wednesday', 'Seint', 'David', 'Luis, Willow', '-'],
+      ['Thursday', 'Seint', 'David', 'Luis', '-'],
+      ['Friday', 'Seint', 'David', 'Luis, Min', '-'],
+      ['Saturday', 'Seint', 'David', 'Lucas, Min', '-'],
+      ['Sunday', 'Seint', 'David', 'Luis, Min', '-']
+    ],
+    cleaning: [
+      ['Monday', 'Luis, Willow', 'Min, Alice, Luis, David', 'Zar, Lucas, Min', 'Willow', 'Zar, Lucas', 'Zar, Lucas'],
+      ['Tuesday', 'Luis, Willow', '-', 'Min, Zar, Lucas', 'Willow', 'Zar, Lucas', 'Zar, Lucas'],
+      ['Wednesday', 'Luis, Lyn', '-', 'Alice, Zar, Lucas', 'Lyn', 'Zar, Lucas', 'Zar, Lucas'],
+      ['Thursday', 'David, Min', '-', 'Min, Zar, Lucas', 'Lyn', 'Zar, Lucas', 'Zar, Lucas'],
+      ['Friday', 'David, Alice', 'David, Luis, Min, Willow, Alice', 'Alice, Lucas, Lyn', 'Willow', 'Lucas, Lyn', 'Lucas, Lyn'],
+      ['Saturday', 'Min, Willow', '-', 'Alice, Zar, Lyn', 'Willow', 'Zar, Lyn', 'Zar, Lyn'],
+      ['Sunday', 'Alice, Min', '-', 'Alice, Zar, Lyn', 'Willow', 'Zar, Lyn', 'Zar, Lyn']
+    ]
+  };
+
+  let rosterData = JSON.parse(localStorage.getItem('rosterData')) || defaultRoster;
+  let isEditMode = false;
+
+  function renderRoster() {
+    ['main', 'thonglor', 'cleaning'].forEach(tab => {
+      const tbody = document.getElementById(`tbody-${tab}`);
+      tbody.innerHTML = '';
+      rosterData[tab].forEach((row, rIndex) => {
+        let tr = document.createElement('tr');
+        row.forEach((cellData, cIndex) => {
+          let td = document.createElement('td');
+          // Don't edit the first column (Days of week)
+          if (isEditMode && cIndex > 0) {
+            td.innerHTML = `<input type="text" id="input-${tab}-${rIndex}-${cIndex}" class="edit-input" value="${cellData}">`;
+          } else {
+            td.innerText = cellData;
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    });
+
+    if(isEditMode) {
+      document.getElementById('edit-roster-btn').classList.add('hidden');
+      document.getElementById('save-roster-btn').classList.remove('hidden');
+      document.getElementById('roster-search').classList.add('hidden'); // Hide search while editing
+    } else {
+      document.getElementById('edit-roster-btn').classList.remove('hidden');
+      document.getElementById('save-roster-btn').classList.add('hidden');
+      document.getElementById('roster-search').classList.remove('hidden');
+      highlightName();
+    }
+  }
+
+  function enableRosterEdit() {
+    isEditMode = true;
+    renderRoster();
+  }
+
+  function saveRoster() {
+    triggerHaptic(40);
+    ['main', 'thonglor', 'cleaning'].forEach(tab => {
+      rosterData[tab].forEach((row, rIndex) => {
+        row.forEach((cellData, cIndex) => {
+          if (cIndex > 0) {
+            let input = document.getElementById(`input-${tab}-${rIndex}-${cIndex}`);
+            if(input) rosterData[tab][rIndex][cIndex] = input.value;
+          }
+        });
+      });
+    });
+    localStorage.setItem('rosterData', JSON.stringify(rosterData));
+    isEditMode = false;
+    renderRoster();
+  }
+
+  function showRosterMenu() {
+    triggerHaptic(30);
+    document.getElementById('home-screen').classList.add('hidden');
+    let screen = document.getElementById('roster-screen');
+    screen.classList.remove('hidden');
+    screen.classList.add('fade-in');
+    renderRoster(); // Build tables on load
+    showRosterTab('main');
+  }
+
+  function showRosterTab(tabId) {
+    triggerHaptic(20);
+    document.getElementById('tab-main').classList.remove('active');
+    document.getElementById('tab-thonglor').classList.remove('active');
+    document.getElementById('tab-cleaning').classList.remove('active');
+    
+    document.getElementById('roster-main').classList.add('hidden'); document.getElementById('roster-main').classList.remove('fade-in');
+    document.getElementById('roster-thonglor').classList.add('hidden'); document.getElementById('roster-thonglor').classList.remove('fade-in');
+    document.getElementById('roster-cleaning').classList.add('hidden'); document.getElementById('roster-cleaning').classList.remove('fade-in');
+    
+    document.getElementById('tab-' + tabId).classList.add('active');
+    let target = document.getElementById('roster-' + tabId);
+    target.classList.remove('hidden'); target.classList.add('fade-in');
+    if (!isEditMode) highlightName();
+  }
+
+  function highlightName() {
+    if (isEditMode) return;
+    let input = document.getElementById('roster-search').value.toLowerCase().trim();
+    let cells = document.querySelectorAll('.roster-table td');
+    
+    cells.forEach(cell => {
+      if(cell.cellIndex === 0) return; 
+      if (input.length > 0 && cell.innerText.toLowerCase().includes(input)) cell.classList.add('highlight-cell');
+      else cell.classList.remove('highlight-cell');
+    });
+  }
+
+  // --- 86 MANAGER ---
+  function showInventoryMenu() {
+    document.getElementById('home-screen').classList.add('hidden');
+    document.getElementById('inventory-screen').classList.remove('hidden');
+    document.getElementById('inventory-screen').classList.add('fade-in');
+    document.getElementById('inv-search').value = '';
+    const container = document.getElementById('inventory-list'); container.innerHTML = '';
+
+    allIngredients.forEach(ing => {
+      let is86 = outOfStock.includes(ing);
+      let row = document.createElement('div');
+      row.className = `inventory-row ${is86 ? 'is-86' : ''}`;
+      row.innerHTML = `<span>${ing}</span><div class="toggle-switch ${is86 ? 'active' : ''}" onclick="toggle86('${ing}', this)"><div class="toggle-knob"></div></div>`;
+      container.appendChild(row);
+    });
+  }
+
+  window.toggle86 = function(ing, element) {
+    triggerHaptic(40); let row = element.parentElement;
+    if (outOfStock.includes(ing)) {
+      outOfStock = outOfStock.filter(i => i !== ing); element.classList.remove('active'); row.classList.remove('is-86');
+    } else {
+      outOfStock.push(ing); element.classList.add('active'); row.classList.add('is-86');
+    }
+    localStorage.setItem('86_list', JSON.stringify(outOfStock));
+  };
+
+  // --- GLOBAL TIMER LOGIC ---
+  let globalTimers = {}; let globalTimerInterval = null;
+
+  function toggleGlobalTimer(recipeId, stepIndex, mins, recipeTitle) {
+    triggerHaptic(30); if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+    let timerId = recipeId + '-' + stepIndex;
+    if (globalTimers[timerId]) { delete globalTimers[timerId]; } 
+    else { let shortTitle = recipeTitle.replace(/[0-9]+\.\s*/, '').split(' (')[0]; globalTimers[timerId] = { remaining: mins * 60, total: mins * 60, title: shortTitle, done: false }; }
+    
+    if (Object.keys(globalTimers).length > 0 && !globalTimerInterval) globalTimerInterval = setInterval(tickGlobalTimers, 1000);
+    updateDynamicIsland(); renderLocalTimers();
+  }
+
+  function tickGlobalTimers() {
+    let activeCount = 0;
+    for (let id in globalTimers) {
+      if (!globalTimers[id].done) {
+        globalTimers[id].remaining--; activeCount++;
+        if (globalTimers[id].remaining <= 0) { globalTimers[id].done = true; globalTimers[id].remaining = 0; fireGlobalAlarm(globalTimers[id].title); }
+      } else { activeCount++; }
+    }
+    updateDynamicIsland(); renderLocalTimers();
+    if (activeCount === 0 && globalTimerInterval) { clearInterval(globalTimerInterval); globalTimerInterval = null; }
+  }
+
+  function fireGlobalAlarm(title) {
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]); playAlarmSound();
+    if ("Notification" in window && Notification.permission === "granted") new Notification("Timer Complete ⏱", { body: title, requireInteraction: true });
+  }
+
+  function updateDynamicIsland() {
+    const island = document.getElementById('dynamic-island'); const keys = Object.keys(globalTimers);
+    if (keys.length === 0) { island.classList.add('hidden'); return; }
+    island.classList.remove('hidden'); island.innerHTML = '';
+    
+    keys.forEach(id => {
+      let t = globalTimers[id]; let row = document.createElement('div'); row.className = 'island-item';
+      let m = Math.floor(t.remaining / 60); let s = t.remaining % 60; let timeStr = t.done ? 'DONE' : `${m}:${s.toString().padStart(2, '0')}`;
+      row.innerHTML = `<span class="island-title">${t.title}</span><span class="island-time ${t.done ? 'done' : ''}">${timeStr}</span><div class="island-close" onclick="dismissIslandTimer('${id}', event)">✕</div>`;
+      island.appendChild(row);
+    });
+  }
+
+  window.dismissIslandTimer = function(id, event) { event.stopPropagation(); triggerHaptic(20); delete globalTimers[id]; updateDynamicIsland(); renderLocalTimers(); };
+
+  function renderLocalTimers() {
+    const pills = document.querySelectorAll('.timer-pill');
+    pills.forEach(pill => {
+      let id = pill.dataset.timerId; let t = globalTimers[id]; let origMins = pill.dataset.origMins;
+      if (t) {
+        if (t.done) { pill.className = 'timer-pill done'; pill.innerHTML = `🔔 Done!`; } 
+        else { pill.className = 'timer-pill running'; let m = Math.floor(t.remaining / 60); let s = t.remaining % 60; pill.innerHTML = `⏱ ${m}:${s.toString().padStart(2, '0')}`; }
+      } else { pill.className = 'timer-pill'; pill.innerHTML = `⏱ ${origMins}:00`; }
+    });
+  }
+
+  // --- MENU LOGIC ---
+  function toggleGroup(groupId) { triggerHaptic(40); document.getElementById(groupId).classList.toggle('group-collapsed'); }
+
+  function showMenu(category) {
+    triggerHaptic(30); currentCategory = category; document.getElementById('home-screen').classList.add('hidden');
+    let menu = document.getElementById('menu-screen'); menu.classList.remove('hidden'); menu.classList.add('fade-in');
+    
+    document.getElementById('menu-search').value = ''; const menuContainer = document.getElementById('menu-buttons'); menuContainer.innerHTML = ''; 
+    
+    let activeData; let groups;
+    if (category === 'preparing') { activeData = preparingData; document.getElementById('menu-title').innerText = 'Prep & Assembly'; groups = { 'pizza': { name: 'Pizzas', icon: '🍕' }, 'panini': { name: 'Paninis / Pala', icon: '🥪' } }; } 
+    else if (category === 'baking') { activeData = bakingData; document.getElementById('menu-title').innerText = 'Baking & Dough'; groups = { 'recipe': { name: 'Dough Recipes', icon: '🥖' }, 'calc': { name: 'Calculators', icon: '🧮' } }; }
+    
+    let groupIndex = 0;
+    for (const [typeKey, groupInfo] of Object.entries(groups)) {
+      let groupHasItems = false; const groupId = `menu-group-${groupIndex}`;
+      let groupDiv = document.createElement('div'); groupDiv.className = 'menu-group group-collapsed'; groupDiv.id = groupId;
+      let groupHeader = document.createElement('div'); groupHeader.className = 'menu-group-header'; groupHeader.onclick = () => toggleGroup(groupId);
+      groupHeader.innerHTML = `<span>${groupInfo.icon} &nbsp; ${groupInfo.name}</span> <div class="premium-chevron"></div>`;
+      let groupContent = document.createElement('div'); groupContent.className = 'menu-group-content';
+      
+      for (const [key, item] of Object.entries(activeData)) {
+        if (item.type === typeKey) {
+          groupHasItems = true; let is86 = isItem86(item); let btn = document.createElement('button');
+          btn.className = `btn menu-btn-item menu-btn-searchable ${is86 ? 'disabled-item' : ''}`; btn.innerText = item.title + (is86 ? ' (86)' : '');
+          btn.dataset.groupId = groupId; btn.onclick = () => loadModule(key, activeData); groupContent.appendChild(btn);
+        }
+      }
+      if (groupHasItems) { groupDiv.appendChild(groupHeader); groupDiv.appendChild(groupContent); menuContainer.appendChild(groupDiv); groupIndex++; }
+    }
+  }
+
+  function filterList(inputId, targetClass) {
+    let input = document.getElementById(inputId).value.toUpperCase(); let items = document.getElementsByClassName(targetClass);
+    for (let i = 0; i < items.length; i++) {
+      let txtValue = items[i].innerText.toUpperCase();
+      if (txtValue.indexOf(input) > -1) { items[i].style.display = ""; if (input !== "" && targetClass === 'menu-btn-searchable') { document.getElementById(items[i].dataset.groupId).classList.remove('group-collapsed'); } } 
+      else { items[i].style.display = "none"; }
+    }
+  }
+
+  let flashcardKeys = Object.keys(preparingData); let isCardFlipped = false;
+
+  function showFlashcards() { triggerHaptic(30); document.getElementById('home-screen').classList.add('hidden'); document.getElementById('flashcard-screen').classList.remove('hidden'); document.getElementById('flashcard-screen').classList.add('fade-in'); nextFlashcard(); }
+  function nextFlashcard() {
+    triggerHaptic(20); isCardFlipped = false; document.getElementById('flashcard-answer').classList.add('hidden'); document.getElementById('flashcard-prompt').classList.remove('hidden');
+    let randomIndex = Math.floor(Math.random() * flashcardKeys.length); let randomItem = preparingData[flashcardKeys[randomIndex]];
+    document.getElementById('flashcard-title').innerText = randomItem.title; const answerList = document.getElementById('flashcard-answer-list'); answerList.innerHTML = '';
+    randomItem.ingredients.forEach(ing => { let li = document.createElement('li'); li.innerText = '• ' + ing; answerList.appendChild(li); });
+  }
+  function flipCard() { if (isCardFlipped) return; triggerHaptic(40); isCardFlipped = true; document.getElementById('flashcard-prompt').classList.add('hidden'); document.getElementById('flashcard-answer').classList.remove('hidden'); }
+
+  function loadModule(id, dataObj) {
+    triggerHaptic(30); requestWakeLock(); currentModuleId = id; document.getElementById('menu-screen').classList.add('hidden');
+    let module = document.getElementById('training-module'); module.classList.remove('hidden'); module.classList.add('fade-in');
+    const item = dataObj[id]; document.getElementById('module-title').innerText = item.title;
+    
+    if(item.type === 'calc') { document.getElementById('standard-content').classList.add('hidden'); document.getElementById('calc-content').classList.remove('hidden'); runCalculator(); return; } 
+    document.getElementById('standard-content').classList.remove('hidden'); document.getElementById('calc-content').classList.add('hidden');
+    
+    const ingList = document.getElementById('ingredient-list'); const title1 = document.getElementById('list-title-1'); ingList.innerHTML = '';
+    if (item.ingredients) {
+      title1.classList.remove('hidden'); let savedIngProgress = JSON.parse(localStorage.getItem('req_progress_' + id)) || [];
+      item.ingredients.forEach((ing, index) => {
+        let li = document.createElement('li'); li.className = 'req-item'; li.innerHTML = `<div class="req-text-wrap"><div class="req-checkbox">✔</div><span>${ing}</span></div>`;
+        if(savedIngProgress.includes(index)) li.classList.add('checked');
+        li.onclick = function() {
+          triggerHaptic(40); this.classList.toggle('checked'); let currentSaved = JSON.parse(localStorage.getItem('req_progress_' + currentModuleId)) || [];
+          if (this.classList.contains('checked')) currentSaved.push(index); else currentSaved = currentSaved.filter(i => i !== index);
+          localStorage.setItem('req_progress_' + currentModuleId, JSON.stringify(currentSaved));
+        }; ingList.appendChild(li);
+      });
+    } else { title1.classList.add('hidden'); }
+
+    const stepList = document.getElementById('step-list'); stepList.innerHTML = ''; let savedProgress = JSON.parse(localStorage.getItem('progress_' + id)) || [];
+    if(item.steps) item.steps.forEach((step, index) => {
+      let li = document.createElement('li'); li.className = 'step-item'; let textSpan = document.createElement('span'); textSpan.className = 'step-text'; textSpan.innerText = `${index + 1}. ${step}`;
+      let iconSpan = document.createElement('span'); iconSpan.className = 'step-icon'; let stepLower = step.toLowerCase();
+      
+      if (step.includes('AFTER BAKING')) iconSpan.innerText = '❄️'; else if (step.includes('Bake') || stepLower.includes('oven')) iconSpan.innerText = '🔥'; else if (stepLower.includes('fold') || stepLower.includes('spots') || stepLower.includes('press') || stepLower.includes('shape')) iconSpan.innerText = '✋'; else iconSpan.innerText = '🔸';
+      li.appendChild(iconSpan); li.appendChild(textSpan);
+
+      const timeMatch = stepLower.match(/(\d+)(?:-\d+)?\s*min/);
+      if (timeMatch && item.type !== 'checklist') { 
+        let mins = parseInt(timeMatch[1]); let timerId = currentModuleId + '-' + index; let timerPill = document.createElement('div'); timerPill.className = 'timer-pill';
+        timerPill.dataset.timerId = timerId; timerPill.dataset.origMins = mins; timerPill.onclick = function(e) { e.stopPropagation(); toggleGlobalTimer(currentModuleId, index, mins, item.title); }; li.appendChild(timerPill);
+      }
+      
+      if(savedProgress.includes(index)) li.classList.add('completed-step');
+      li.onclick = function() { 
+        triggerHaptic(40); this.classList.toggle('completed-step'); let currentSaved = JSON.parse(localStorage.getItem('progress_' + currentModuleId)) || [];
+        if (this.classList.contains('completed-step')) currentSaved.push(index); else currentSaved = currentSaved.filter(i => i !== index);
+        localStorage.setItem('progress_' + currentModuleId, JSON.stringify(currentSaved)); checkAutoReturn();
+      }; stepList.appendChild(li);
+    }); renderLocalTimers();
+  }
+
+  function runCalculator() {
+    let qty = parseFloat(document.getElementById('calc-qty').value) || 0; let weight = parseFloat(document.getElementById('calc-weight').value) || 0;
+    let totalDough = qty * weight; let hydration = 0.70; let saltPercentage = 0.03; let totalFlour = totalDough / (1 + hydration + saltPercentage);
+    let bigaFlour = totalFlour * 0.30; let bigaWater = bigaFlour; let bigaYeast = bigaFlour * 0.01; let finalFlour = totalFlour - bigaFlour; let finalWater = (totalFlour * hydration) - bigaWater; let finalSalt = totalFlour * saltPercentage;
+    document.getElementById('res-biga-flour').innerText = Math.round(bigaFlour); document.getElementById('res-biga-water').innerText = Math.round(bigaWater); document.getElementById('res-biga-yeast').innerText = bigaYeast.toFixed(1);
+    document.getElementById('res-final-flour').innerText = Math.round(finalFlour); document.getElementById('res-final-water').innerText = Math.round(finalWater); document.getElementById('res-final-salt').innerText = Math.round(finalSalt);
+  }
+
+  function checkAutoReturn() {
+    const allSteps = document.querySelectorAll('.step-item'); const completedSteps = document.querySelectorAll('.completed-step');
+    if (allSteps.length > 0 && allSteps.length === completedSteps.length) { setTimeout(() => { localStorage.removeItem('progress_' + currentModuleId); localStorage.removeItem('req_progress_' + currentModuleId); goBackToMenu(); }, 750); }
+  }
+
+  function goHome() {
+    triggerHaptic(30); releaseWakeLock(); document.getElementById('menu-screen').classList.add('hidden'); document.getElementById('flashcard-screen').classList.add('hidden'); document.getElementById('inventory-screen').classList.add('hidden'); document.getElementById('training-module').classList.add('hidden'); document.getElementById('roster-screen').classList.add('hidden'); 
+    let home = document.getElementById('home-screen'); home.classList.remove('hidden'); home.classList.add('fade-in'); isEditMode = false;
+  }
+
+  function goBackToMenu() {
+    triggerHaptic(30); releaseWakeLock(); document.getElementById('training-module').classList.add('hidden');
+    let menu = document.getElementById('menu-screen'); menu.classList.remove('hidden'); menu.classList.add('fade-in');
+  }
+</script>
+
+</body>
+</html>
