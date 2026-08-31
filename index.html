@@ -95,12 +95,17 @@
   .card-content h3 { margin: 0 0 4px 0; color: var(--text-main); font-size: 1.1em; letter-spacing: -0.2px; text-transform: none;}
   .card-content p { margin: 0; color: var(--text-muted); font-size: 0.85em; font-weight: 500;}
 
-  /* --- ADMIN MODAL --- */
-  #admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 20000; display: flex; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.3s ease;}
-  #admin-modal.hidden { opacity: 0; pointer-events: none; }
-  .modal-card { background: var(--card-bg); padding: 30px; border-radius: 24px; text-align: center; width: 90%; max-width: 340px; border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  /* --- MODALS --- */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 20000; display: flex; justify-content: center; align-items: center; opacity: 1; transition: opacity 0.3s ease;}
+  .modal-overlay.hidden { opacity: 0; pointer-events: none; }
+  .modal-card { background: var(--card-bg); padding: 30px; border-radius: 24px; text-align: center; width: 90%; max-width: 380px; border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
   .pin-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--item-bg); color: var(--text-main); font-size: 1.2em; text-align: center; margin-bottom: 20px; outline: none; transition: 0.3s; box-sizing: border-box;}
   .pin-input:focus { border-color: var(--accent-admin); background: rgba(255,255,255,0.05); }
+
+  /* Staff Picker Grid */
+  .staff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; max-height: 50vh; overflow-y: auto; padding: 5px;}
+  .staff-btn { background: var(--item-bg); border: 1px solid var(--glass-border); padding: 14px; border-radius: 14px; color: var(--text-main); font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.95em;}
+  .staff-btn.active { background: var(--accent-admin); border-color: var(--accent-admin); color: white; box-shadow: 0 4px 12px rgba(58,134,255,0.3); }
 
   /* --- SCHEDULE & DUTIES --- */
   .segmented-control { display: flex; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--glass-border);}
@@ -114,10 +119,12 @@
   .roster-table th { background: rgba(0,0,0,0.2); font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.8em; letter-spacing: 1px; }
   .roster-table tr:last-child td { border-bottom: none; }
   .roster-table td { color: var(--text-main); text-transform: capitalize; transition: all 0.3s ease;}
+  
   td.highlight-cell { background-color: rgba(58, 134, 255, 0.25); color: #fff; font-weight: 700; border: 1px solid var(--accent-admin); box-shadow: inset 0 0 10px rgba(58, 134, 255, 0.2);}
+  td.editable-cell { cursor: pointer; background: rgba(58, 134, 255, 0.15) !important; border: 1px dashed var(--accent-admin) !important; color: #fff; font-weight: 600;}
+  td.editable-cell:active { background: rgba(58, 134, 255, 0.3) !important; }
+  
   .warning-banner { background: rgba(230, 57, 70, 0.15); border: 1px solid var(--accent); color: #ff6b6b; padding: 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600; margin-bottom: 15px; text-align: center; line-height: 1.4;}
-
-  .edit-input { width: 100px; padding: 8px; border-radius: 8px; border: 1px solid var(--accent-admin); background: var(--bg-color); color: var(--text-main); font-family: inherit; }
 
   /* --- EXISTING STYLES --- */
   .search-bar { width: 100%; padding: 16px 20px; border-radius: 20px; border: 1px solid var(--glass-border); background: var(--item-bg); color: var(--text-main); margin-bottom: 20px; font-size: 16px; box-sizing: border-box; outline: none; transition: all 0.3s ease; }
@@ -187,8 +194,7 @@
 </head>
 <body>
 
-<!-- ADMIN PASSWORD MODAL -->
-<div id="admin-modal" class="hidden">
+<div id="admin-modal" class="modal-overlay hidden">
   <div class="modal-card">
     <h2 style="color: var(--text-main); margin-bottom: 20px;">Admin Access</h2>
     <input type="password" id="admin-pin" class="pin-input" placeholder="Enter Password">
@@ -197,9 +203,17 @@
   </div>
 </div>
 
-<div id="dynamic-island" class="hidden">
-  <!-- Active timers injected here -->
+<div id="staff-modal" class="modal-overlay hidden" style="z-index: 21000;">
+  <div class="modal-card">
+    <h2 style="color: var(--text-main); margin-bottom: 20px;">Assign Staff</h2>
+    <div id="staff-grid" class="staff-grid"></div>
+    <button class="btn btn-admin" onclick="confirmStaffPicker()">Confirm Shift</button>
+    <button class="btn btn-ghost" onclick="closeStaffPicker()">Cancel</button>
+  </div>
 </div>
+
+<div id="dynamic-island" class="hidden">
+  </div>
 
 <div class="card" id="app-container">
   <div class="header-container">
@@ -218,10 +232,10 @@
         </div>
       </div>
       
-      <div class="home-card" onclick="showMenu('baking')">
+      <div class="home-card" onclick="requestAdminAccess(() => showMenu('baking'))">
         <div class="card-icon icon-bake">🔥</div>
         <div class="card-content">
-          <h3>Baking & Dough</h3>
+          <h3>Baking & Dough (Locked)</h3>
           <p>Biga Calculators & Oven Timers</p>
         </div>
       </div>
@@ -245,7 +259,6 @@
         </div>
       </div>
       
-      <!-- REQUIRES ADMIN PIN -->
       <div class="home-card" onclick="requestAdminAccess(showInventoryMenu)">
         <div class="card-icon icon-admin">🛑</div>
         <div class="card-content">
@@ -260,7 +273,6 @@
     </div>
   </div>
 
-  <!-- --- ROSTER & CLEANING SCREEN --- -->
   <div id="roster-screen" class="hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h2 style="color: var(--text-main); margin: 0;">Roster & Duties</h2>
@@ -268,6 +280,7 @@
       <button id="save-roster-btn" class="btn btn-prep hidden" style="width: auto; padding: 10px 15px; margin: 0; font-size: 0.85em;" onclick="saveRoster()">💾 Save</button>
     </div>
     
+    <p id="edit-instruction" class="hidden" style="color: var(--accent-admin); font-weight: 600; font-size: 0.9em; text-align: center; margin-bottom: 15px;">Tap any highlighted cell to assign staff.</p>
     <input type="text" id="roster-search" class="search-bar" onkeyup="highlightName()" placeholder="Search your name (e.g. Lucas)...">
     
     <div class="segmented-control">
@@ -438,7 +451,7 @@
   function verifyAdminPin() {
     triggerHaptic(20);
     const input = document.getElementById('admin-pin').value;
-    if (input === 'Portaromana@manage') {
+    if (input === 'Portaromana@1234') {
       document.getElementById('admin-modal').classList.add('hidden');
       if (pendingAdminAction) pendingAdminAction();
     } else {
@@ -507,7 +520,7 @@
 
   function isItem86(itemObj) { return itemObj.ingredients && itemObj.ingredients.some(ing => outOfStock.includes(ing)); }
 
-  // --- EDITABLE ROSTER DATABASE ---
+  // --- EDITABLE ROSTER DATABASE & PICKER ---
   const defaultRoster = {
     main: [
       ['Monday', 'Jerry', 'Willow', 'Min', 'Zar, Lucas', 'Lyn, Seint'],
@@ -538,8 +551,10 @@
     ]
   };
 
+  const staffList = ['Alice', 'David', 'Jerry', 'Lucas', 'Luis', 'Lyn', 'Min', 'Seint', 'Willow', 'Zar', '- (Empty)'];
   let rosterData = JSON.parse(localStorage.getItem('rosterData')) || defaultRoster;
   let isEditMode = false;
+  let activeCellEdit = null;
 
   function renderRoster() {
     ['main', 'thonglor', 'cleaning'].forEach(tab => {
@@ -549,11 +564,10 @@
         let tr = document.createElement('tr');
         row.forEach((cellData, cIndex) => {
           let td = document.createElement('td');
-          // Don't edit the first column (Days of week)
+          td.innerText = cellData;
           if (isEditMode && cIndex > 0) {
-            td.innerHTML = `<input type="text" id="input-${tab}-${rIndex}-${cIndex}" class="edit-input" value="${cellData}">`;
-          } else {
-            td.innerText = cellData;
+            td.className = 'editable-cell';
+            td.onclick = () => openStaffPicker(tab, rIndex, cIndex, cellData);
           }
           tr.appendChild(td);
         });
@@ -564,11 +578,13 @@
     if(isEditMode) {
       document.getElementById('edit-roster-btn').classList.add('hidden');
       document.getElementById('save-roster-btn').classList.remove('hidden');
-      document.getElementById('roster-search').classList.add('hidden'); // Hide search while editing
+      document.getElementById('roster-search').classList.add('hidden'); 
+      document.getElementById('edit-instruction').classList.remove('hidden'); 
     } else {
       document.getElementById('edit-roster-btn').classList.remove('hidden');
       document.getElementById('save-roster-btn').classList.add('hidden');
       document.getElementById('roster-search').classList.remove('hidden');
+      document.getElementById('edit-instruction').classList.add('hidden');
       highlightName();
     }
   }
@@ -580,19 +596,71 @@
 
   function saveRoster() {
     triggerHaptic(40);
-    ['main', 'thonglor', 'cleaning'].forEach(tab => {
-      rosterData[tab].forEach((row, rIndex) => {
-        row.forEach((cellData, cIndex) => {
-          if (cIndex > 0) {
-            let input = document.getElementById(`input-${tab}-${rIndex}-${cIndex}`);
-            if(input) rosterData[tab][rIndex][cIndex] = input.value;
-          }
-        });
-      });
-    });
     localStorage.setItem('rosterData', JSON.stringify(rosterData));
     isEditMode = false;
     renderRoster();
+  }
+
+  // --- STAFF MULTI-PICKER LOGIC ---
+  function openStaffPicker(tab, r, c, currentData) {
+    triggerHaptic(20);
+    activeCellEdit = { tab, r, c };
+    const modal = document.getElementById('staff-modal');
+    const grid = document.getElementById('staff-grid');
+    grid.innerHTML = '';
+    
+    const currentStaffArray = currentData.split(',').map(s => s.trim());
+    
+    staffList.forEach(staff => {
+      let btn = document.createElement('button');
+      btn.className = 'staff-btn';
+      let cleanName = staff === '- (Empty)' ? '-' : staff;
+      btn.innerText = staff;
+      
+      if (currentStaffArray.includes(cleanName)) btn.classList.add('active');
+      
+      btn.onclick = function() {
+        triggerHaptic(20);
+        if (staff === '- (Empty)') {
+          Array.from(grid.children).forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+        } else {
+          let emptyBtn = Array.from(grid.children).find(b => b.innerText === '- (Empty)');
+          if(emptyBtn) emptyBtn.classList.remove('active');
+          this.classList.toggle('active');
+        }
+      };
+      grid.appendChild(btn);
+    });
+    
+    modal.classList.remove('hidden');
+  }
+
+  function confirmStaffPicker() {
+    triggerHaptic(30);
+    const grid = document.getElementById('staff-grid');
+    let selected = [];
+    
+    Array.from(grid.children).forEach(btn => {
+      if (btn.classList.contains('active')) {
+        selected.push(btn.innerText === '- (Empty)' ? '-' : btn.innerText);
+      }
+    });
+    
+    let finalString = selected.length > 0 ? selected.join(', ') : '-';
+    
+    if (activeCellEdit) {
+      rosterData[activeCellEdit.tab][activeCellEdit.r][activeCellEdit.c] = finalString;
+    }
+    
+    closeStaffPicker();
+    renderRoster();
+  }
+
+  function closeStaffPicker() {
+    triggerHaptic(20);
+    document.getElementById('staff-modal').classList.add('hidden');
+    activeCellEdit = null;
   }
 
   function showRosterMenu() {
@@ -601,7 +669,7 @@
     let screen = document.getElementById('roster-screen');
     screen.classList.remove('hidden');
     screen.classList.add('fade-in');
-    renderRoster(); // Build tables on load
+    renderRoster();
     showRosterTab('main');
   }
 
